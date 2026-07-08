@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KANKA">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAGsklEQVR42u2d3VIURxiGv21+RCCgBARdJGtIQkQx/tyAt+JxjpJ78QZylqpcQS4gR6YKBAxFrMRdWFBBEAgif0sOUpXCyo6B7pmd/r553tOtrpr++tn3e7t3dqbU1z0oCDWTowQIOBBwIOBAwIGAAwEHAg4EHAg4EHAgBBwIOFC42os57a0H3553SP+vj4tWpZL5n+w9OIAYy3BkCkRxQDEFRy5MGKbEAhyRMGGPEsVwRMuEGUpUwqEIC9WIKINDKRZKEVEDhwEs1CGiAA5jWChCJGo4DGOhApFI4SgIFpEj4iCDWetwjmJiEa2FOMjAQmKHAzIirEb+bQUsom0xDjKwkBjhgIzIq+QgAz7iggMyVFTMQQZ8xAIHZCiqnoMM+MgfDshQV8kWHYJlO59HD+XRQ8+xP/4ij39u/tGVfvnpO/+r+v4HefJHdpNuwfmYwzMSNXXdf+xxQ+aWtVfVQUaibgfAsbgq7w+019ZBRrJzjPmPfVo1kD8cZDRXV6eMD/sPn6627EqzqzOPYEjQZFnafItzciKzNQM1cOpwVhA4XqzJ9p6Bza2DjPQDRwt7SqY1d5DRRKWS3Br1Hz5TzeWqU688maOZKkPS2xX/VkVZ5jByRh5y/FXfkPWdvC483fo7yEg5jc7kbBsprgJtJe00+rRmpgwuQmBz1qUeKQ/odY4U1wLnSDVwrO9IfQPnMGobgYEjmn1KKiuCc6QaOGaqlirhIoE0FnW0ycRV/+HTEcERvi44x4eauCYdvo/83t6TF2s4h1HbCAwcszU5OYlqNoGrg3OkB8d01VgxXI5gWtvHRvmTSsga4RynVB6Qy72eY/cOZHEV58A2mml+SY4bcU7Le6VwjpQCx0zNXj2A47RzcPyVBhwGe0pPl3w25Dn28FieLcc8Ob/1wjn+7Smj4kqeYxfqcnCEcxA4itJTPOGw+X9563B4rBrO8U8ZnEz63m7eaMjcEs5hV+PDcrHTc+zzV7K7Dxx2e8pUIQLHedcO5yCNAsf/OAe3mwNHUw31yXC/59jqmrzdBQ42sU17ijLbONcK4hxFSaO0FdIocKSozg75YsRz7Mu38noLOOzqZlna27AN4GimL0f8xwKHcbUFVMDuCce54eDh5R9o8y+prWu88LOvI7sV755SMz9F4PDuKVXgQAVNo8ARoPeHwIESdO8GcKAE3a8AB0pyDuBASbrcK5Uh4EAFjR2Fh2P5DbEDOBL0/JX/y9juVaRUAg67ajTkWd1zbF+3fH4FOEwr5JVbpmMHcIjMBvyZ0XTsAA6R+SVp+D4i8m7F/8ENwKFAu/vy52vPsb1d/regWoKjBS9Pz00hf5PXFjvOvo44R3AmfWA2kwJHcCa9MxZ0IypwxK7VTXnj+9a+7gsycQ04MI+k2FEBDmJHgu7fAA7TCtmwTF33/9ucGTgs72Z/fyn7vreFdnXKzbKxfSzOcUpHx/Jb3X+4xdgBHCllUouxAzhSyqS3r/u/HM4MHJZjx/yy/0vaOtvl1mjk8zvv2uEcp7SzJ9WA/0abix3AkV5nMRc7fOCw3FlCMunkqFzoMNNTcI5UnaOjLejBhLSV2FXfkM2Ah87auqXUEw5u/EmIHZFmUr/1wjlS7Sxfl/1fzUFbMZ5J25zcGQMOu51lcSXobX7xxQ7vlcI5/qPDY1lYsRc7Wg2HWfMIiR1fXZWeLgO2gXNksGFxTr4xEjtcjmDahCOm2BG4OjhHM229C3o6sZXY4XLH0+CGdnxE+i5qtw2c4yOdJSCTupLctWAeLhJITTmH5H9vRyorgnMkqLYu2+8CYoeFX+BcVKjaMY/KkFzqUW0bOEdmG9pSycBdgy5CYKNxjrA3quQER4qr4KK9svy1sCKHx7piR7r1p60k6+BIFgN+gRsblE8/oa3YNY85TRva1CvvVFylyg1La+HIouZO0bXqy6Stih0ZVZvM8VFt7kp9w394eUCG+sgcmEdu5pFdnZ3S61YTOzKGI9MKl/q6B7MuL6+yVvrdcwbmABmK4YAPpfV0xuYDGVq3svChq4bO8NwgQxkc8KGobq4g84QMNXDAh4pauQLOGTIUwAEfkdenFcfnZxFH7BF+bRy1gIzY4YCPCOsQS1uhxUT49XDUiFlrco6iWUi0X4ao4TCPSOQeqQAOk4ioaJ1q4DCDiKJEpQwO1YioC9oq4VCHiNL9l2I44qdE+57cAhyxUWLmnMYUHPlSYu/sziYcLQPF9mGufTjSIqaAh/oFhQOdRTyCAQEHAg4EHAg4EHAg4EDAgYADAQcCDoSAA51dfwPRRSKE94U9HQAAAABJRU5ErkJggg==">
+<title>KANKA Cep — Curator Konsolu</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+:root{
+  --zemin:#0E0A14; --kart:#1A1424; --cizgi:#2C2140;
+  --murekkep:#F2ECDF; --soluk:#9C92AE;
+  --vurgu:#FF3D7F; --amber:#FFC94D; --yesil:#3ADF7C; --kirmizi:#FF5C5C;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; padding:0; background:var(--zemin); color:var(--murekkep);
+  font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{min-height:100dvh; padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky; top:0; z-index:5; background:linear-gradient(180deg,#141020,#141020ee);
+  border-bottom:1px solid var(--cizgi); padding:14px 18px calc(10px);
+  display:flex; align-items:baseline; gap:10px}
+.logo{font-family:'Anton',Impact,sans-serif; font-size:26px; letter-spacing:2px; color:var(--vurgu)}
+.logo span{color:var(--amber)}
+#durum{margin-left:auto; font-size:12px; color:var(--soluk); display:flex; align-items:center; gap:6px}
+#nokta{width:9px;height:9px;border-radius:50%;background:var(--kirmizi)}
+main{padding:16px; max-width:560px; margin:0 auto}
+.sekme{display:none}
+.sekme.acik{display:block; animation:gel .18s ease}
+@keyframes gel{from{opacity:0; transform:translateY(6px)} to{opacity:1}}
+.kart{background:var(--kart); border:1px solid var(--cizgi); border-radius:16px;
+  padding:16px; margin-bottom:14px}
+h2{font-family:'Anton',Impact,sans-serif; font-weight:400; letter-spacing:1px;
+  font-size:18px; margin:0 0 10px; color:var(--amber)}
+p{margin:6px 0}
+.ipucu{color:var(--soluk); font-size:13px}
+label{display:block; font-size:13px; color:var(--soluk); margin:10px 0 4px}
+input[type=text]{width:100%; background:#0F0B18; color:var(--murekkep);
+  border:1px solid var(--cizgi); border-radius:10px; padding:12px; font-size:15px}
+button{border:0; border-radius:12px; padding:13px 16px; font-size:15px; font-weight:600;
+  background:#2A2140; color:var(--murekkep); width:100%; margin-top:10px; cursor:pointer}
+button:active{transform:scale(.985)}
+button.ana{background:var(--vurgu); color:#fff}
+button.amber{background:var(--amber); color:#231A00}
+button.tehlike{background:var(--kirmizi); color:#fff}
+button.kucuk{width:auto; padding:8px 12px; font-size:13px; margin:6px 6px 0 0; display:inline-block}
+.cumaBtn{margin:22px auto; display:block; width:230px; height:230px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #FF6FA3, var(--vurgu) 60%, #C21D5B);
+  border:4px dotted var(--amber); color:#fff; font-family:'Anton',Impact,sans-serif;
+  font-size:26px; letter-spacing:2px; line-height:1.25;
+  box-shadow:0 0 44px #FF3D7F55}
+.cumaBtn small{display:block; font-family:-apple-system,sans-serif; font-size:12px;
+  font-weight:400; letter-spacing:0; margin-top:6px; opacity:.9}
+table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:8px}
+th,td{padding:7px 6px; text-align:right; border-bottom:1px solid var(--cizgi)}
+th{color:var(--soluk); font-weight:500}
+td:first-child,th:first-child{text-align:left}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.arti{color:var(--yesil)} .eksi{color:var(--kirmizi)}
+.rozet{display:inline-block; background:#2A2140; border-radius:999px; padding:4px 10px;
+  font-size:12.5px; margin:3px 4px 0 0}
+#log{font-size:13.5px}
+#log div{padding:5px 0; border-bottom:1px dashed var(--cizgi)}
+nav{position:fixed; bottom:0; left:0; right:0; background:#141020f2;
+  border-top:1px solid var(--cizgi); display:flex;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1; background:none; margin:0; padding:8px 2px; border-radius:10px;
+  font-size:11.5px; color:var(--soluk); font-weight:500}
+nav button .ik{display:block; font-size:19px; margin-bottom:2px}
+nav button.secili{color:var(--vurgu)}
+#toast{position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(92px + env(safe-area-inset-bottom)); background:#2A2140; color:var(--murekkep);
+  padding:11px 18px; border-radius:12px; font-size:14px; opacity:0; pointer-events:none;
+  transition:opacity .25s; max-width:88%; text-align:center; z-index:9}
+#toast.goster{opacity:1}
+.bosluk{color:var(--soluk); text-align:center; padding:26px 10px; font-size:14px}
+a{color:var(--amber)}
+@media (prefers-reduced-motion: reduce){ .sekme.acik{animation:none} }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">KANKA <span>CEP</span></div>
+  <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
+</header>
+
+<main>
+<!-- ================= CUMA ================= -->
+<section id="s-cuma" class="sekme acik">
+  <button class="cumaBtn" onclick="cumaRutini()">CUMA<br>RUTİNİ ▶<small>KPI + yedek + rapor + sayaç</small></button>
+  <div class="kart"><h2>Akış</h2><div id="log"><div class="ipucu">Butona bas, gerisini bana bırak. Bitince Claude'a git, rotasyonu konuşalım 😄</div></div></div>
+  <div id="cumaSonuc"></div>
+</section>
+
+<!-- ================= KPI ================= -->
+<section id="s-kpi" class="sekme">
+  <div class="kart">
+    <h2>Takipçi KPI</h2>
+    <p class="ipucu">Baz: 7 Tem 2026 → 34.923. Her ölçüm kalıcı günlüğe işlenir.</p>
+    <button class="ana" onclick="kpiOlc()">Ölç ve kaydet</button>
+    <div id="kpiTablo"></div>
+  </div>
+  <div class="kart">
+    <h2>Şarkı Nabzı (popülerlik)</h2>
+    <p class="ipucu">Resmi popülerlik puanı 0-100 — haftalık Δ yönü hazineyi gösterir. Gerçek dinlenme sayacı PC'deki KANKA v1.1'de.</p>
+    <label>Şarkı linki ekle</label>
+    <input type="text" id="watchLink" placeholder="https://open.spotify.com/track/...">
+    <button onclick="watchEkle()">İzlemeye al</button>
+    <button class="amber" onclick="popOlc()">Nabız ölç</button>
+    <div id="watchListe"></div>
+    <div id="popTablo"></div>
+  </div>
+</section>
+
+<!-- ================= RAPOR ================= -->
+<section id="s-rapor" class="sekme">
+  <div class="kart">
+    <h2>Liste Raporu</h2>
+    <label>Liste (boş = ana liste)</label>
+    <input type="text" id="raporLink" placeholder="ana liste">
+    <button class="ana" onclick="raporUret()">Raporu üret</button>
+  </div>
+  <div id="raporSonuc"></div>
+</section>
+
+<!-- ================= AKTAR ================= -->
+<section id="s-aktar" class="sekme">
+  <div class="kart">
+    <h2>Aktar (gizli → ana)</h2>
+    <label>Kaynak (boş = gizli liste)</label>
+    <input type="text" id="kaynakLink" placeholder="gizli liste">
+    <label>Hedef (boş = ana liste)</label>
+    <input type="text" id="hedefLink" placeholder="ana liste">
+    <button onclick="fark()">Önizle (fark analizi)</button>
+    <div id="farkSonuc"></div>
+    <button class="tehlike" onclick="aktar()">AKTAR — hedefin üzerine yaz</button>
+    <p class="ipucu">Aktarımdan önce hedefin yedeği otomatik alınır. Sıra birebir korunur.</p>
+  </div>
+</section>
+
+<!-- ================= YEDEK ================= -->
+<section id="s-yedek" class="sekme">
+  <div class="kart">
+    <h2>Yedek</h2>
+    <label>Liste (boş = ana liste)</label>
+    <input type="text" id="yedekLink" placeholder="ana liste">
+    <button class="ana" onclick="yedekAl(null,true)">Şimdi yedek al</button>
+  </div>
+  <div class="kart"><h2>Kasadakiler</h2><div id="yedekListe" class="bosluk">Henüz yedek yok.</div></div>
+</section>
+
+<!-- ================= AYAR ================= -->
+<section id="s-ayar" class="sekme">
+  <div class="kart">
+    <h2>Bağlantı</h2>
+    <label>Spotify Client ID</label>
+    <input type="text" id="aClient" placeholder="developer.spotify.com'dan">
+    <label>Ana liste linki</label>
+    <input type="text" id="aAna" placeholder="https://open.spotify.com/playlist/...">
+    <label>Gizli (staging) liste linki</label>
+    <input type="text" id="aGizli" placeholder="opsiyonel">
+    <button onclick="ayarKaydet()">Kaydet</button>
+    <button class="ana" onclick="girisYap()">Spotify ile bağlan</button>
+    <div id="girisAdim"></div>
+    <button onclick="cikis()">Bağlantıyı kes</button>
+  </div>
+  <div class="kart">
+    <h2>Kurulum (tek seferlik)</h2>
+    <p class="ipucu">1) Bu sayfanın adresini kopyala, developer.spotify.com → uygulaman → Settings → <b>Redirect URIs</b>'e ekle, kaydet:</p>
+    <input type="text" id="benimAdres" readonly>
+    <button class="kucuk" onclick="adresKopyala()">Adresi kopyala</button>
+    <p class="ipucu">2) Client ID'yi yukarı yapıştır → Kaydet → <b>Spotify ile bağlan</b> → izin ver; otomatik geri dönersin.<br>
+    3) Safari Paylaş menüsü → <b>Ana Ekrana Ekle</b> → KANKA artık telefonunda uygulama. Günlükler tek depoda biriksin diye hep bu ikondan aç.<br>
+    Not: PC'deki KANKA ile aynı Spotify uygulaması kullanılabilir; Redirect URI'ler yan yana durur.</p>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="secili" data-s="cuma" onclick="sekme('cuma',this)"><span class="ik">🎧</span>Cuma</button>
+  <button data-s="kpi" onclick="sekme('kpi',this)"><span class="ik">📈</span>KPI</button>
+  <button data-s="rapor" onclick="sekme('rapor',this)"><span class="ik">📊</span>Rapor</button>
+  <button data-s="aktar" onclick="sekme('aktar',this)"><span class="ik">🔁</span>Aktar</button>
+  <button data-s="yedek" onclick="sekme('yedek',this)"><span class="ik">🗄️</span>Yedek</button>
+  <button data-s="ayar" onclick="sekme('ayar',this)"><span class="ik">⚙️</span>Ayar</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+/* ================= GENEL ================= */
+const $=id=>document.getElementById(id);
+const BAZ={t:"2026-07-07",v:34923,baz:true};
+let token=null, tokenSon=0, ayar={client_id:"",ana:"https://open.spotify.com/playlist/2tCvIeWBgzgPSrxXOlzwK1",gizli:""};
+
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("goster");
+  clearTimeout(t._z);t._z=setTimeout(()=>t.classList.remove("goster"),2600);}
+function sekme(ad,btn){document.querySelectorAll(".sekme").forEach(s=>s.classList.remove("acik"));
+  $("s-"+ad).classList.add("acik");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("secili"));
+  if(btn)btn.classList.add("secili");}
+function sayi(n){return n.toLocaleString("tr-TR");}
+function delta(n){if(n===null)return "—";const s=(n>0?"+":"")+sayi(n);
+  return `<span class="${n>0?"arti":(n<0?"eksi":"")}">${s}</span>`;}
+function bugun(){const d=new Date();return d.toISOString().slice(0,10);}
+function saat(){const d=new Date();return d.toTimeString().slice(0,5);}
+function pid(link){if(!link)return null;const m=link.match(/playlist[\/:]([A-Za-z0-9]+)/);
+  return m?m[1]:link.trim();}
+function sureStr(ms){const dk=Math.round(ms/60000);return Math.floor(dk/60)+" sa "+(dk%60)+" dk";}
+
+async function depoAl(k,varsayilan){try{const v=localStorage.getItem("kanka_"+k);
+  return v?JSON.parse(v):varsayilan;}catch(e){return varsayilan;}}
+async function depoYaz(k,v){try{localStorage.setItem("kanka_"+k,JSON.stringify(v));}
+  catch(e){toast("Depo hatası: "+e.message);}}
+
+/* ================= AUTH (PKCE) ================= */
+function adres(){return location.origin+location.pathname;}
+function rastgele(n){const a=new Uint8Array(n);crypto.getRandomValues(a);
+  return Array.from(a,x=>("0"+x.toString(16)).slice(-2)).join("");}
+function b64url(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))
+  .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+
+async function girisYap(){
+  if(!ayar.client_id){toast("Önce Client ID gir ve kaydet.");return;}
+  const dogrulayici=rastgele(48);
+  await depoYaz("pkce",dogrulayici);
+  const ozet=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(dogrulayici));
+  location.href="https://accounts.spotify.com/authorize?client_id="+ayar.client_id+
+    "&response_type=code&redirect_uri="+encodeURIComponent(adres())+
+    "&scope="+encodeURIComponent("playlist-read-private playlist-modify-public playlist-modify-private")+
+    "&code_challenge_method=S256&code_challenge="+b64url(ozet);
+}
+async function tokenIste(gov){
+  const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},body:gov});
+  const j=await r.json();
+  if(j.error)throw new Error(j.error_description||j.error);
+  token=j.access_token; tokenSon=Date.now()+ (j.expires_in-60)*1000;
+  if(j.refresh_token)await depoYaz("auth",{rt:j.refresh_token});
+  bagliGoster(true);
+}
+async function kodDegistir(kod){
+  const d=await depoAl("pkce","");
+  await tokenIste(new URLSearchParams({grant_type:"authorization_code",code:kod,
+    redirect_uri:adres(),client_id:ayar.client_id,code_verifier:d}));
+}
+async function tokenTazele(){
+  const a=await depoAl("auth",null);
+  if(!a||!a.rt)return false;
+  try{await tokenIste(new URLSearchParams({grant_type:"refresh_token",
+    refresh_token:a.rt,client_id:ayar.client_id}));return true;}
+  catch(e){bagliGoster(false);return false;}
+}
+async function hazir(){
+  if(token&&Date.now()<tokenSon)return true;
+  return await tokenTazele();
+}
+async function cikis(){token=null;await depoYaz("auth",{});bagliGoster(false);toast("Bağlantı kesildi.");}
+function bagliGoster(e){$("nokta").style.background=e?"var(--yesil)":"var(--kirmizi)";
+  $("durumYazi").textContent=e?"bağlı":"bağlı değil";}
+
+/* ================= SPOTIFY API ================= */
+async function api(yol,secenek){
+  if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
+  const r=await fetch(yol.startsWith("http")?yol:"https://api.spotify.com/v1"+yol,
+    Object.assign({headers:{Authorization:"Bearer "+token,
+      "Content-Type":"application/json"}},secenek||{}));
+  if(r.status===429){await new Promise(x=>setTimeout(x,1500));return api(yol,secenek);}
+  if(r.status===204)return {};
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
+  return j;
+}
+async function listeMeta(id){
+  const j=await api("/playlists/"+id+"?fields=name,followers.total");
+  return {ad:j.name,takipci:j.followers.total};
+}
+async function parcalar(id){
+  let url="/playlists/"+id+"/tracks?limit=100&fields=items(track(uri,name,duration_ms,artists(name))),next";
+  const dizi=[];
+  while(url){
+    const j=await api(url);
+    (j.items||[]).forEach(it=>{const t=it.track;if(!t||!t.uri||t.uri.includes(":local:"))return;
+      dizi.push({uri:t.uri,sarki:t.name,sure:t.duration_ms||0,
+        sanatci:(t.artists||[]).map(a=>a.name).join(", ")});});
+    url=j.next;
+  }
+  return dizi;
+}
+async function listeyeYaz(id,uriler){
+  await api("/playlists/"+id+"/tracks",{method:"PUT",
+    body:JSON.stringify({uris:uriler.slice(0,100)})});
+  for(let i=100;i<uriler.length;i+=100)
+    await api("/playlists/"+id+"/tracks",{method:"POST",
+      body:JSON.stringify({uris:uriler.slice(i,i+100)})});
+}
+
+/* ================= KPI ================= */
+async function kpiOlc(sessiz){
+  try{
+    const id=pid(ayar.ana);if(!id)throw new Error("Ayarlarda ana liste yok.");
+    const m=await listeMeta(id);
+    let log=await depoAl("kpi",[]);
+    if(log.length===0)log.push(BAZ);
+    log.push({t:bugun()+" "+saat(),v:m.takipci});
+    await depoYaz("kpi",log);
+    kpiTabloBas(log);
+    if(!sessiz)toast("Kaydedildi: "+sayi(m.takipci)+" takipçi");
+    return m.takipci;
+  }catch(e){toast(e.message);}
+}
+function kpiTabloBas(log){
+  if(!log||!log.length){$("kpiTablo").innerHTML="";return;}
+  const ilk=log[0].v;let h="<table><tr><th>Tarih</th><th>Takipçi</th><th>Δ önceki</th><th>Δ baz</th></tr>";
+  log.slice(-10).forEach((s,i,dizi)=>{
+    const onceki=i>0?dizi[i-1].v:(log.length>10?log[log.length-11].v:null);
+    h+=`<tr><td>${s.t}${s.baz?" <span class='rozet'>baz</span>":""}</td>`+
+       `<td class="mono">${sayi(s.v)}</td>`+
+       `<td class="mono">${onceki!==null?delta(s.v-onceki):"—"}</td>`+
+       `<td class="mono">${delta(s.v-ilk)}</td></tr>`;});
+  $("kpiTablo").innerHTML=h+"</table>";
+}
+
+/* ================= ŞARKI NABZI ================= */
+async function watchEkle(){
+  try{
+    const m=($("watchLink").value||"").match(/track[\/:]([A-Za-z0-9]+)/);
+    if(!m){toast("Şarkı linki çözülemedi.");return;}
+    const t=await api("/tracks/"+m[1]);
+    let w=await depoAl("watch",[]);
+    if(w.some(x=>x.id===t.id)){toast("Zaten izleniyor.");return;}
+    w.push({id:t.id,ad:t.artists.map(a=>a.name).join(", ")+" — "+t.name});
+    await depoYaz("watch",w);$("watchLink").value="";watchBas(w);
+    toast("İzlemeye alındı.");
+  }catch(e){toast(e.message);}
+}
+async function watchSil(id){
+  let w=await depoAl("watch",[]);w=w.filter(x=>x.id!==id);
+  await depoYaz("watch",w);watchBas(w);
+}
+function watchBas(w){
+  $("watchListe").innerHTML=w.map(x=>
+    `<span class="rozet">${x.ad} <a href="#" onclick="watchSil('${x.id}');return false">✕</a></span>`).join("")||
+    "<p class='ipucu'>İzlenen şarkı yok — hazineleri buraya ekle.</p>";
+}
+async function popOlc(sessiz){
+  try{
+    const w=await depoAl("watch",[]);
+    if(!w.length){if(!sessiz)toast("Önce şarkı ekle.");return;}
+    const j=await api("/tracks?ids="+w.map(x=>x.id).join(","));
+    let log=await depoAl("poplog",{});
+    const zaman=bugun();
+    let h="<table><tr><th>Şarkı</th><th>Pop.</th><th>Δ önceki</th><th>Δ ilk</th></tr>";
+    (j.tracks||[]).forEach(t=>{
+      if(!t)return;
+      const gecmis=log[t.id]||[];
+      const oncekiV=gecmis.length?gecmis[gecmis.length-1].p:null;
+      const ilkV=gecmis.length?gecmis[0].p:null;
+      gecmis.push({t:zaman,p:t.popularity});log[t.id]=gecmis;
+      const ad=(w.find(x=>x.id===t.id)||{}).ad||t.name;
+      h+=`<tr><td>${ad.slice(0,34)}</td><td class="mono">${t.popularity}</td>`+
+         `<td class="mono">${oncekiV!==null?delta(t.popularity-oncekiV):"—"}</td>`+
+         `<td class="mono">${ilkV!==null?delta(t.popularity-ilkV):"—"}</td></tr>`;});
+    await depoYaz("poplog",log);
+    $("popTablo").innerHTML=h+"</table>";
+  }catch(e){toast(e.message);}
+}
+
+/* ================= RAPOR ================= */
+async function raporUret(hedefId,kutu){
+  try{
+    const id=hedefId||pid($("raporLink").value)||pid(ayar.ana);
+    if(!id)throw new Error("Liste linki yok.");
+    const m=await listeMeta(id), p=await parcalar(id);
+    const say={};p.forEach(x=>{const a=x.sanatci.split(",")[0].trim();say[a]=(say[a]||0)+1;});
+    const enCok=Object.entries(say).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const son={},ihlal=[];
+    p.forEach((x,i)=>{const a=x.sanatci.split(",")[0].trim();
+      if(son[a]!==undefined&&(i+1)-son[a]<5)ihlal.push(a+": "+son[a]+"→"+(i+1));
+      son[a]=i+1;});
+    const gorulen={},cift=[];
+    p.forEach((x,i)=>{if(gorulen[x.uri]!==undefined)cift.push(x.sanatci+" — "+x.sarki);
+      gorulen[x.uri]=i;});
+    const h=`<div class="kart"><h2>${m.ad}</h2>
+      <p><span class="rozet">🎵 ${p.length} parça</span>
+         <span class="rozet">⏱ ${sureStr(p.reduce((a,x)=>a+x.sure,0))}</span>
+         <span class="rozet">❤️ ${sayi(m.takipci)}</span></p>
+      <table><tr><th>Sanatçı</th><th>Adet</th></tr>
+      ${enCok.map(x=>`<tr><td>${x[0]}</td><td class="mono">${x[1]}</td></tr>`).join("")}</table>
+      <p class="${cift.length?"eksi":"arti"}">${cift.length?"⚠ Çift: "+cift.join("; "):"✓ Çift şarkı yok"}</p>
+      <p class="${ihlal.length?"eksi":"arti"}" style="font-size:13px">${ihlal.length?"⚠ Ara kuralı (&lt;5): "+ihlal.join("; "):"✓ Sanatçı ara kuralı temiz"}</p>
+      </div>`;
+    (kutu||$("raporSonuc")).innerHTML=h;
+  }catch(e){toast(e.message);}
+}
+
+/* ================= YEDEK ================= */
+async function yedekAl(hedefId,goster){
+  try{
+    const id=hedefId||pid($("yedekLink").value)||pid(ayar.ana);
+    if(!id)throw new Error("Liste linki yok.");
+    const m=await listeMeta(id), p=await parcalar(id);
+    let y=await depoAl("yedekler",[]);
+    y.unshift({t:bugun()+" "+saat(),ad:m.ad,id:id,parcalar:p});
+    if(y.length>8)y=y.slice(0,8);
+    await depoYaz("yedekler",y);
+    yedekBas(y);
+    if(goster)toast("Yedek kasada: "+p.length+" parça");
+    return p;
+  }catch(e){toast(e.message);}
+}
+function yedekBas(y){
+  if(!y.length){$("yedekListe").innerHTML="Henüz yedek yok.";return;}
+  $("yedekListe").innerHTML=y.map((x,i)=>
+    `<p><b>${x.t}</b> — ${x.ad} (${x.parcalar.length})<br>
+     <button class="kucuk" onclick="yedekIndir(${i})">TXT indir</button>
+     <button class="kucuk" onclick="geriYukle(${i})">Geri yükle</button>
+     <button class="kucuk" onclick="yedekSil(${i})">Sil</button></p>`).join("");
+}
+async function yedekIndir(i){
+  const y=await depoAl("yedekler",[]);const x=y[i];if(!x)return;
+  const metin="# "+x.ad+" — "+x.t+"\n"+
+    x.parcalar.map((p,n)=>(n+1)+". "+p.sanatci+" — "+p.sarki).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([metin],{type:"text/plain"}));
+  a.download="yedek_"+x.t.replace(/[: ]/g,"-")+".txt";a.click();
+}
+async function yedekSil(i){
+  let y=await depoAl("yedekler",[]);y.splice(i,1);
+  await depoYaz("yedekler",y);yedekBas(y);
+}
+async function geriYukle(i){
+  const y=await depoAl("yedekler",[]);const x=y[i];if(!x)return;
+  if(!confirm("'"+x.ad+"' listesi "+x.t+" yedeğiyle DEĞİŞTİRİLECEK. Emin misin?"))return;
+  try{await listeyeYaz(x.id,x.parcalar.map(p=>p.uri));toast("Geri yüklendi ✓");}
+  catch(e){toast(e.message);}
+}
+
+/* ================= AKTAR ================= */
+async function fark(){
+  try{
+    const k=pid($("kaynakLink").value)||pid(ayar.gizli);
+    const h=pid($("hedefLink").value)||pid(ayar.ana);
+    if(!k||!h)throw new Error("Kaynak ve hedef gerekli.");
+    const kp=await parcalar(k), hp=await parcalar(h);
+    const hset=new Map(hp.map((x,i)=>[x.uri,i]));
+    const kset=new Map(kp.map((x,i)=>[x.uri,i]));
+    const giren=kp.filter(x=>!hset.has(x.uri));
+    const cikan=hp.filter(x=>!kset.has(x.uri));
+    let yer=0;kp.forEach((x,i)=>{if(hset.has(x.uri)&&hset.get(x.uri)!==i)yer++;});
+    $("farkSonuc").innerHTML=`<p class="arti">+ Girecek (${giren.length}): ${giren.slice(0,8).map(x=>x.sarki).join(", ")||"yok"}</p>
+      <p class="eksi">− Çıkacak (${cikan.length}): ${cikan.slice(0,8).map(x=>x.sarki).join(", ")||"yok"}</p>
+      <p class="ipucu">↕ Yeri değişen ortak parça: ${yer} • Kaynak ${kp.length} / Hedef ${hp.length} parça</p>`;
+  }catch(e){toast(e.message);}
+}
+async function aktar(){
+  try{
+    const k=pid($("kaynakLink").value)||pid(ayar.gizli);
+    const h=pid($("hedefLink").value)||pid(ayar.ana);
+    if(!k||!h)throw new Error("Kaynak ve hedef gerekli.");
+    const kp=await parcalar(k);
+    if(!kp.length)throw new Error("Kaynak boş.");
+    if(!confirm("Hedef listenin içeriği silinip yerine "+kp.length+" parça yazılacak. Onay?"))return;
+    await yedekAl(h,false);
+    await listeyeYaz(h,kp.map(x=>x.uri));
+    toast("Aktarım tamam: "+kp.length+" parça 🎉");
+  }catch(e){toast(e.message);}
+}
+
+/* ================= CUMA RUTİNİ ================= */
+function logSatir(m){const d=document.createElement("div");d.innerHTML=m;$("log").appendChild(d);}
+async function cumaRutini(){
+  $("log").innerHTML="";$("cumaSonuc").innerHTML="";
+  try{
+    if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
+    logSatir("① Yedek alınıyor...");
+    const p=await yedekAl(pid(ayar.ana),false);
+    logSatir("✓ "+p.length+" parça kasada");
+    logSatir("② Takipçi ölçülüyor...");
+    const t=await kpiOlc(true);
+    logSatir("✓ "+sayi(t)+" takipçi günlüğe işlendi");
+    logSatir("③ Sağlık raporu...");
+    await raporUret(pid(ayar.ana),$("cumaSonuc"));
+    logSatir("✓ Rapor aşağıda");
+    const w=await depoAl("watch",[]);
+    if(w.length){logSatir("④ Şarkı nabızları...");await popOlc(true);
+      logSatir("✓ "+w.length+" şarkı ölçüldü (KPI sekmesinde)");}
+    logSatir("<b style='color:var(--yesil)'>Rutin tamam. Şimdi Claude'a git kanka — chart'ları çekip rotasyonu konuşalım 😄🎧</b>");
+  }catch(e){logSatir("<span class='eksi'>Hata: "+e.message+"</span>");}
+}
+
+/* ================= AYAR & AÇILIŞ ================= */
+async function ayarKaydet(){
+  ayar={client_id:$("aClient").value.trim(),
+        ana:$("aAna").value.trim()||ayar.ana,
+        gizli:$("aGizli").value.trim()};
+  await depoYaz("ayar",ayar);toast("Ayarlar kaydedildi.");
+}
+function adresKopyala(){
+  navigator.clipboard.writeText(adres()).then(()=>toast("Adres kopyalandı."))
+  .catch(()=>toast("Kopyalanamadı — elle seçip kopyala."));
+}
+(async function(){
+  ayar=Object.assign(ayar,await depoAl("ayar",{}));
+  $("aClient").value=ayar.client_id||"";
+  $("aAna").value=ayar.ana||"";
+  $("aGizli").value=ayar.gizli||"";
+  $("benimAdres").value=adres();
+  kpiTabloBas(await depoAl("kpi",[]));
+  watchBas(await depoAl("watch",[]));
+  yedekBas(await depoAl("yedekler",[]));
+  const kod=new URLSearchParams(location.search).get("code");
+  if(kod){
+    try{await kodDegistir(kod);toast("Spotify bağlandı ✓");}
+    catch(e){toast("Bağlantı hatası: "+e.message);}
+    history.replaceState({},"",adres());
+  }else{
+    if(ayar.client_id)await tokenTazele();
+  }
+})();
+</script>
+</body>
+</html>
