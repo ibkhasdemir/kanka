@@ -82,7 +82,7 @@ a{color:var(--amber)}
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.3</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.4</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -104,7 +104,7 @@ a{color:var(--amber)}
   </div>
   <div class="kart">
     <h2>Şarkı Nabzı (popülerlik)</h2>
-    <p class="ipucu">Resmi popülerlik puanı 0-100 — haftalık Δ yönü hazineyi gösterir. Gerçek dinlenme sayacı PC'deki KANKA v1.1'de.</p>
+    <p class="ipucu">Hazine izleme kaydın burada durur. Spotify Şubat 2026'da popülerlik verisini kapattığı için sayı takibi PC'deki KANKA sayaç modülünde; cuma performans denetimini Claude chart verisiyle yapar.</p>
     <label>Şarkı linki ekle</label>
     <input type="text" id="watchLink" placeholder="https://open.spotify.com/track/...">
     <button onclick="watchEkle()">İzlemeye al</button>
@@ -386,18 +386,24 @@ async function popOlc(sessiz){
     let log=await depoAl("poplog",{});
     const zaman=bugun();
     let h="<table><tr><th>Şarkı</th><th>Pop.</th><th>Δ önceki</th><th>Δ ilk</th></tr>";
+    let veriYok=false;
     sonuclar.forEach(t=>{
       if(!t)return;
+      const p=(typeof t.popularity==="number")?t.popularity:null;
       const gecmis=log[t.id]||[];
       const oncekiV=gecmis.length?gecmis[gecmis.length-1].p:null;
       const ilkV=gecmis.length?gecmis[0].p:null;
-      gecmis.push({t:zaman,p:t.popularity});log[t.id]=gecmis;
+      if(p!==null){gecmis.push({t:zaman,p:p});log[t.id]=gecmis;}
+      else veriYok=true;
       const ad=(w.find(x=>x.id===t.id)||{}).ad||t.name;
-      h+=`<tr><td>${ad.slice(0,34)}</td><td class="mono">${t.popularity}</td>`+
-         `<td class="mono">${oncekiV!==null?delta(t.popularity-oncekiV):"—"}</td>`+
-         `<td class="mono">${ilkV!==null?delta(t.popularity-ilkV):"—"}</td></tr>`;});
+      const d1=(p!==null&&oncekiV!==null)?delta(p-oncekiV):"—";
+      const d2=(p!==null&&ilkV!==null)?delta(p-ilkV):"—";
+      h+=`<tr><td>${ad.slice(0,34)}</td><td class="mono">${p!==null?p:"—"}</td>`+
+         `<td class="mono">${d1}</td><td class="mono">${d2}</td></tr>`;});
     await depoYaz("poplog",log);
-    $("popTablo").innerHTML=h+"</table>";
+    h+="</table>";
+    if(veriYok)h+="<p class='ipucu'>Not: Spotify, Şubat 2026'da popülerlik verisini geliştirici uygulamalarına kapattı. Bu liste hazine kaydı olarak iş görür; sayı takibi PC'deki KANKA sayaç modülünde.</p>";
+    $("popTablo").innerHTML=h;
   }catch(e){toast(e.message);}
 }
 
@@ -513,7 +519,7 @@ async function cumaRutini(){
     logSatir("✓ "+p.length+" parça kasada");
     logSatir("② Takipçi ölçülüyor...");
     const t=await kpiOlc(true);
-    logSatir("✓ "+sayi(t)+" takipçi günlüğe işlendi");
+    logSatir("✓ Takipçi: "+sayi(t));
     logSatir("③ Sağlık raporu...");
     await raporUret(pid(ayar.ana),$("cumaSonuc"));
     logSatir("✓ Rapor aşağıda");
