@@ -82,7 +82,7 @@ a{color:var(--amber)}
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.3</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -277,15 +277,43 @@ async function listeMeta(id){
   const j=await api("/playlists/"+id+"?fields=name,followers.total");
   return {ad:j.name,takipci:j.followers.total};
 }
-async function parcalar(id){
-  let url="/playlists/"+id+"/items?limit=100&fields=items(item(uri,name,duration_ms,artists(name))),next";
-  const dizi=[];
+function parcaEkleDizi(dizi,it){
+  const t=(it&&(it.item||it.track))||it;
+  if(!t||!t.uri||String(t.uri).includes(":local:"))return;
+  dizi.push({uri:t.uri,sarki:t.name,sure:t.duration_ms||0,
+    sanatci:(t.artists||[]).map(a=>a.name).join(", ")});
+}
+async function sayfalari(url,dizi){
   while(url){
     const j=await api(url);
-    (j.items||[]).forEach(it=>{const t=it.item||it.track;if(!t||!t.uri||t.uri.includes(":local:"))return;
-      dizi.push({uri:t.uri,sarki:t.name,sure:t.duration_ms||0,
-        sanatci:(t.artists||[]).map(a=>a.name).join(", ")});});
+    (j.items||[]).forEach(it=>parcaEkleDizi(dizi,it));
     url=j.next;
+  }
+}
+async function parcalar(id){
+  const dizi=[];
+  try{
+    await sayfalari("/playlists/"+id+"/items?limit=100&fields=items(item(uri,name,duration_ms,artists(name))),next",dizi);
+    return dizi;
+  }catch(e1){dizi.length=0;}
+  try{
+    await sayfalari("/playlists/"+id+"/tracks?limit=100&fields=items(track(uri,name,duration_ms,artists(name))),next",dizi);
+    return dizi;
+  }catch(e2){dizi.length=0;}
+  // Son çare: çalıştığı kanıtlı /playlists/{id} kapısından gömülü okuma
+  let pg=null;
+  try{
+    const j=await api("/playlists/"+id+"?fields=items(items(item(uri,name,duration_ms,artists(name))),next,total)");
+    pg=j.items;
+  }catch(e3){}
+  if(!pg||!pg.items){
+    const j=await api("/playlists/"+id+"?fields=tracks(items(track(uri,name,duration_ms,artists(name))),next,total)");
+    pg=j.tracks;
+  }
+  ((pg&&pg.items)||[]).forEach(it=>parcaEkleDizi(dizi,it));
+  if(pg&&pg.next){
+    try{await sayfalari(pg.next,dizi);}
+    catch(e4){toast("Not: Spotify kısıtı — ilk "+dizi.length+" parça okunabildi");}
   }
   return dizi;
 }
