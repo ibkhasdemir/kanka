@@ -37,8 +37,9 @@ h2{font-family:'Anton',Impact,sans-serif; font-weight:400; letter-spacing:1px;
 p{margin:6px 0}
 .ipucu{color:var(--soluk); font-size:13px}
 label{display:block; font-size:13px; color:var(--soluk); margin:10px 0 4px}
-input[type=text]{width:100%; background:#0F0B18; color:var(--murekkep);
+input[type=text],textarea{width:100%; background:#0F0B18; color:var(--murekkep);
   border:1px solid var(--cizgi); border-radius:10px; padding:12px; font-size:15px}
+textarea{resize:vertical; font-family:inherit; min-height:130px}
 button{border:0; border-radius:12px; padding:13px 16px; font-size:15px; font-weight:600;
   background:#2A2140; color:var(--murekkep); width:100%; margin-top:10px; cursor:pointer}
 button:active{transform:scale(.985)}
@@ -82,7 +83,7 @@ a{color:var(--amber)}
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.4</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.5</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -137,6 +138,16 @@ a{color:var(--amber)}
     <div id="farkSonuc"></div>
     <button class="tehlike" onclick="aktar()">AKTAR — hedefin üzerine yaz</button>
     <p class="ipucu">Aktarımdan önce hedefin yedeği otomatik alınır. Sıra birebir korunur.</p>
+  </div>
+  <div class="kart">
+    <h2>🪄 Metinden Liste Kur</h2>
+    <p class="ipucu">Claude'un yazdığı listeyi buraya yapıştır — şarkıları Spotify'da kendim bulur, sırasıyla listeye yazarım. Amele modu kapandı.</p>
+    <textarea id="metinListe" placeholder="1. Şarkı — Sanatçı&#10;2. Şarkı — Sanatçı&#10;..."></textarea>
+    <label>Hedef liste (boş = gizli liste, o da yoksa ana)</label>
+    <input type="text" id="kurHedef" placeholder="https://open.spotify.com/playlist/...">
+    <button class="amber" onclick="metindenBul()">① Şarkıları bul</button>
+    <div id="kurOnizleme"></div>
+    <button class="ana" onclick="metindenYaz()">② Listeye yaz</button>
   </div>
 </section>
 
@@ -505,6 +516,72 @@ async function aktar(){
     await yedekAl(h,false);
     await listeyeYaz(h,kp.map(x=>x.uri));
     toast("Aktarım tamam: "+kp.length+" parça 🎉");
+  }catch(e){toast(e.message);}
+}
+
+/* ================= METİNDEN LİSTE KUR ================= */
+let kurSonuc=[];
+function satirAyikla(metin){
+  metin=metin.replace(/\s·\s/g,"\n");
+  const sonuc=[];
+  for(let s of metin.split("\n")){
+    s=s.trim();
+    if(!s||s.startsWith("■")||s.startsWith("#"))continue;
+    s=s.replace(/\*+/g,"");
+    s=s.replace(/\([^)]*\)/g,"");
+    s=s.replace(/^\d+[\.\):：]?\s*/,"");
+    s=s.replace(/[\u{1F100}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu," ");
+    s=s.replace(/[✕✗✓⚠🔒]/g," ");
+    s=s.replace(/\s+/g," ").trim();
+    if(s.length<3||!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(s))continue;
+    sonuc.push({etiket:s,sorgu:s.replace(/[—–|]/g," ")});
+  }
+  return sonuc;
+}
+async function metindenBul(){
+  try{
+    const adaylar=satirAyikla($("metinListe").value||"");
+    if(!adaylar.length){toast("Liste metni boş görünüyor.");return;}
+    kurSonuc=[];
+    for(let i=0;i<adaylar.length;i++){
+      const a=adaylar[i];
+      $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+(i+1)+"/"+adaylar.length+" — "+a.etiket.slice(0,40)+"</p>";
+      try{
+        const j=await api("/search?type=track&limit=3&market=TR&q="+encodeURIComponent(a.sorgu));
+        const liste=(j.tracks&&j.tracks.items)||j.items||[];
+        const t=liste[0];
+        if(t)kurSonuc.push({ok:true,etiket:a.etiket,uri:t.uri,
+          bulunan:(t.artists||[]).map(x=>x.name).join(", ")+" — "+t.name});
+        else kurSonuc.push({ok:false,etiket:a.etiket});
+      }catch(e){kurSonuc.push({ok:false,etiket:a.etiket,hata:e.message});}
+    }
+    kurCiz();
+  }catch(e){toast(e.message);}
+}
+function kurCiz(){
+  const b=kurSonuc.filter(x=>x.ok).length,yok=kurSonuc.filter(x=>!x.ok).length;
+  let h="<p><b class='arti'>✓ "+b+" eşleşti</b>"+(yok?"  <b class='eksi'>✗ "+yok+" bulunamadı</b>":"")+"</p>";
+  h+=kurSonuc.map((x,i)=>x.ok?
+    "<p style='font-size:13px'>"+(i+1)+". "+x.bulunan+
+    " <a href='#' onclick='kurSil("+i+");return false'>✕</a></p>":
+    "<p style='font-size:13px' class='eksi'>"+(i+1)+". "+x.etiket+" — bulunamadı"+
+    (x.hata?" ("+x.hata+")":"")+", atlanacak</p>").join("");
+  h+="<p class='ipucu'>Yanlış eşleşeni ✕ ile çıkar, sonra ② ile yaz.</p>";
+  $("kurOnizleme").innerHTML=h;
+}
+function kurSil(i){kurSonuc.splice(i,1);kurCiz();}
+async function metindenYaz(){
+  try{
+    const uriler=kurSonuc.filter(x=>x.ok).map(x=>x.uri);
+    if(!uriler.length){toast("Önce ① ile şarkıları bul.");return;}
+    const hp=pid($("kurHedef").value)||pid(ayar.gizli)||pid(ayar.ana);
+    if(!hp){toast("Hedef yok — Ayar'dan gizli ya da ana liste gir.");return;}
+    const m=await listeMeta(hp);
+    if(!confirm("'"+m.ad+"' listesinin içeriği silinip yerine "+uriler.length+
+      " şarkı bu sırayla yazılacak. Onay?"))return;
+    await yedekAl(hp,false);
+    await listeyeYaz(hp,uriler);
+    toast("Liste kuruldu: "+uriler.length+" şarkı 🎉");
   }catch(e){toast(e.message);}
 }
 
