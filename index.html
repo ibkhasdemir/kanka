@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.1</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.2</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -247,7 +247,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
   </div>
   <div class="kart">
     <h2>Liste Defteri</h2>
-    <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b>Yazma kilidi</b> kapalıyken o listeye hiçbir şey yazılamaz.</p>
+    <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b><b>yazabilir</b> tiki atılmayan listeye program hiçbir şey yazamaz. Sadece okur.</p>
     <button onclick="listeleriCek()">Listelerimi çek</button>
     <p class="ipucu" id="defterOzet"></p>
     <div id="defterSec"></div>
@@ -713,7 +713,7 @@ function defterCiz(){
         "<select class='dalan' data-id='"+p.id+"' data-a='ritim'>"+
           ["haftalık","aylık","3 aylık"].map(x=>"<option "+(d.ritim===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
         "<label class='kilit'><input type='checkbox' class='dalan' data-id='"+p.id+"' data-a='yazma' "+
-          (d.yazma?"checked":"")+">yazma</label></div>";
+          (d.yazma?"checked":"")+">yazabilir</label></div>";
     }
     return "<div class='secsat'>"+
       "<input type='checkbox' class='dsec' data-id='"+p.id+"' data-ad='"+kacir(p.name)+"' "+(d?"checked":"")+">"+
