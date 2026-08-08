@@ -625,10 +625,39 @@ async function listeleriCek(){
     $("defterSec").innerHTML=cekilen.length? cekilen.map(p=>{
       const v=defter.some(d=>d.id===p.id);
       return "<div class='secsat'><input type='checkbox' data-id='"+p.id+"' "+(v?"checked":"")+
-        "><div><b>"+kacir(p.name)+"</b><br><span class='ipucu'>"+((p.tracks&&p.tracks.total)||0)+" şarkı</span></div></div>";
+        "><div><b>"+kacir(p.name)+"</b><br><span class='ipucu sayi' data-id='"+p.id+"' data-bek='"+(listeSayi(p)===null?"1":"0")+"'>"+(listeSayi(p)===null?"sayılıyor…":listeSayi(p)+" şarkı")+"</span></div></div>";
     }).join("") : "<p class='ipucu'>Kendi listen bulunamadı.</p>";
     $("defterKaydet").style.display="block";
+    sayilariDoldur();
   }catch(e){toast(e.message);}
+}
+function listeSayi(p){
+  const n=(p&&p.tracks&&typeof p.tracks.total==="number")?p.tracks.total
+        :(p&&p.items &&typeof p.items.total ==="number")?p.items.total
+        :(typeof (p||{}).track_count==="number")?p.track_count:null;
+  return (n===null||n===0)? null : n;   // 0 = güvenilmez, ayrıca sorulacak
+}
+async function sayiSor(id){
+  for(const uc of ["items","tracks"]){
+    try{ const j=await api("/playlists/"+id+"/"+uc+"?limit=1");
+         if(j&&typeof j.total==="number")return j.total; }catch(e){}
+  }
+  try{ const j=await api("/playlists/"+id+"?fields=items(total)"); if(j&&j.items&&typeof j.items.total==="number")return j.items.total; }catch(e){}
+  try{ const j=await api("/playlists/"+id+"?fields=tracks(total)"); if(j&&j.tracks&&typeof j.tracks.total==="number")return j.tracks.total; }catch(e){}
+  return null;
+}
+async function sayilariDoldur(){
+  const isci=async function(){
+    while(true){
+      const el=document.querySelector("#defterSec .sayi[data-bek='1']");
+      if(!el)return;
+      el.dataset.bek="0";
+      const n=await sayiSor(el.dataset.id);
+      el.textContent = (n===null)? "sayı alınamadı" : n+" şarkı";
+      await new Promise(r=>setTimeout(r,60));
+    }
+  };
+  await Promise.all([isci(),isci(),isci()]);
 }
 function kacir(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 async function defterKaydet(){
