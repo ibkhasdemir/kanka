@@ -115,6 +115,9 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 .secsat{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cizgi)}
 .secsat input{width:22px;height:22px;flex:0 0 22px;accent-color:var(--vurgu)}
 .secsat b{font-weight:500;font-size:14px}
+.secsat .gv{flex:1;min-width:0}
+.dayar{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;margin-top:8px}
+.dayar select{padding:7px 8px;font-size:13px}
 
 /* --- ÜZERİNE YAZMA KAPISI --- */
 #kapi{position:fixed;inset:0;z-index:60;background:#06040Bee;display:none;
@@ -142,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.6</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.7</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -246,9 +249,8 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     <h2>Liste Defteri</h2>
     <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b>Yazma kilidi</b> kapalıyken o listeye hiçbir şey yazılamaz.</p>
     <button onclick="listeleriCek()">Listelerimi çek</button>
+    <p class="ipucu" id="defterOzet"></p>
     <div id="defterSec"></div>
-    <button class="ana" id="defterBtnKaydet" style="display:none">Seçimi kaydet</button>
-    <div id="defterAyar"></div>
   </div>
   <div class="kart">
     <h2>Kurulum (tek seferlik)</h2>
@@ -613,7 +615,35 @@ async function aktar(){
 }
 
 /* ================= LİSTE DEFTERİ (v1.6) ================= */
-let defter=[], cekilen=[];
+let defter=[], cekilen=[], sayilar={};
+
+function kacir(t){return String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function listeSayi(p){
+  const n=(p&&p.tracks&&typeof p.tracks.total==="number")?p.tracks.total
+        :(p&&p.items &&typeof p.items.total ==="number")?p.items.total
+        :(typeof (p||{}).track_count==="number")?p.track_count:null;
+  return (n===null||n===0)? null : n;
+}
+async function sayiSor(id){
+  for(const uc of ["items","tracks"]){
+    try{ const j=await api("/playlists/"+id+"/"+uc+"?limit=1");
+         if(j&&typeof j.total==="number")return j.total; }catch(e){}
+  }
+  return null;
+}
+async function sayilariDoldur(){
+  const isci=async function(){
+    while(true){
+      const kalan=cekilen.filter(p=>sayilar[p.id]===undefined&&!p._bek);
+      if(!kalan.length)return;
+      const p=kalan[0]; p._bek=true;
+      sayilar[p.id]=await sayiSor(p.id);
+      defterCiz();
+      await new Promise(r=>setTimeout(r,60));
+    }
+  };
+  await Promise.all([isci(),isci(),isci()]);
+}
 
 async function listeleriCek(){
   try{
@@ -622,93 +652,54 @@ async function listeleriCek(){
     let url="/me/playlists?limit=50", hepsi=[];
     while(url){const j=await api(url); hepsi=hepsi.concat(j.items||[]); url=j.next; if(hepsi.length>300)break;}
     cekilen=hepsi.filter(p=>p&&p.owner&&p.owner.id===ben.id);
-    $("defterSec").innerHTML=cekilen.length? cekilen.map(p=>{
-      const v=defter.some(d=>d.id===p.id);
-      return "<div class='secsat'><input type='checkbox' data-id='"+p.id+"' data-ad=\""+kacir(p.name)+"\" "+(v?"checked":"")+
-        "><div><b>"+kacir(p.name)+"</b><br><span class='ipucu sayi' data-id='"+p.id+"' data-bek='"+(listeSayi(p)===null?"1":"0")+"'>"+(listeSayi(p)===null?"sayılıyor…":listeSayi(p)+" şarkı")+"</span></div></div>";
-    }).join("") : "<p class='ipucu'>Kendi listen bulunamadı.</p>";
-    $("defterBtnKaydet").style.display="block";
+    cekilen.forEach(p=>{const n=listeSayi(p); if(n!==null)sayilar[p.id]=n;});
+    defterCiz();
     sayilariDoldur();
   }catch(e){toast(e.message);}
 }
-function listeSayi(p){
-  const n=(p&&p.tracks&&typeof p.tracks.total==="number")?p.tracks.total
-        :(p&&p.items &&typeof p.items.total ==="number")?p.items.total
-        :(typeof (p||{}).track_count==="number")?p.track_count:null;
-  return (n===null||n===0)? null : n;   // 0 = güvenilmez, ayrıca sorulacak
-}
-async function sayiSor(id){
-  for(const uc of ["items","tracks"]){
-    try{ const j=await api("/playlists/"+id+"/"+uc+"?limit=1");
-         if(j&&typeof j.total==="number")return j.total; }catch(e){}
-  }
-  try{ const j=await api("/playlists/"+id+"?fields=items(total)"); if(j&&j.items&&typeof j.items.total==="number")return j.items.total; }catch(e){}
-  try{ const j=await api("/playlists/"+id+"?fields=tracks(total)"); if(j&&j.tracks&&typeof j.tracks.total==="number")return j.tracks.total; }catch(e){}
-  return null;
-}
-async function sayilariDoldur(){
-  const isci=async function(){
-    while(true){
-      const el=document.querySelector("#defterSec .sayi[data-bek='1']");
-      if(!el)return;
-      el.dataset.bek="0";
-      const n=await sayiSor(el.dataset.id);
-      el.textContent = (n===null)? "sayı alınamadı" : n+" şarkı";
-      await new Promise(r=>setTimeout(r,60));
+
+function defterCiz(){
+  const kaynak = cekilen.length ? cekilen
+               : defter.map(d=>({id:d.id,name:d.ad}));
+  $("defterOzet").textContent = defter.length
+    ? ("Defterde "+defter.length+" liste. İşaretlediğin her listenin ayarı kendi satırında.")
+    : (kaynak.length? "Hiç liste seçilmemiş. İşaretle, ayarları hemen altında çıkar." : "Önce listelerini çek.");
+  if(!kaynak.length){$("defterSec").innerHTML="";return;}
+  $("defterSec").innerHTML = kaynak.map(function(p){
+    const d=defter.find(x=>x.id===p.id);
+    const n=sayilar[p.id];
+    const sy = n===undefined? "sayılıyor…" : (n===null? "sayı alınamadı" : n+" şarkı");
+    let ayar="";
+    if(d){
+      ayar="<div class='dayar'>"+
+        "<select class='dalan' data-id='"+p.id+"' data-a='rol'>"+
+          ["AKIŞ","STOK"].map(x=>"<option "+(d.rol===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
+        "<select class='dalan' data-id='"+p.id+"' data-a='ritim'>"+
+          ["haftalık","aylık","3 aylık"].map(x=>"<option "+(d.ritim===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
+        "<label class='kilit'><input type='checkbox' class='dalan' data-id='"+p.id+"' data-a='yazma' "+
+          (d.yazma?"checked":"")+">yazma</label></div>";
     }
-  };
-  await Promise.all([isci(),isci(),isci()]);
+    return "<div class='secsat'>"+
+      "<input type='checkbox' class='dsec' data-id='"+p.id+"' data-ad='"+kacir(p.name)+"' "+(d?"checked":"")+">"+
+      "<div class='gv'><b>"+kacir(p.name)+"</b><br><span class='ipucu'>"+sy+"</span>"+ayar+"</div></div>";
+  }).join("");
 }
-function kacir(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-async function defterKaydet(){
-  const kutular=Array.from(document.querySelectorAll("#defterSec input[type=checkbox]:checked"));
-  if(!kutular.length){toast("Hiç liste işaretlemedin.");return;}
-  defter=kutular.map(function(k){
-    const id=k.dataset.id;
-    const eski=defter.find(d=>d.id===id);
-    const p=cekilen.find(x=>x.id===id);
-    return eski||{id:id, ad:k.dataset.ad||(p&&p.name)||id, rol:"AKIŞ", ritim:"haftalık", yazma:false};
-  });
+
+async function defterDokun(el){
+  const id=el.dataset.id;
+  if(el.classList.contains("dsec")){
+    if(el.checked){
+      if(!defter.some(d=>d.id===id))
+        defter.push({id:id, ad:el.dataset.ad||id, rol:"AKIŞ", ritim:"haftalık", yazma:false});
+    }else{
+      defter=defter.filter(d=>d.id!==id);
+    }
+  }else if(el.classList.contains("dalan")){
+    const d=defter.find(x=>x.id===id); if(!d)return;
+    d[el.dataset.a]= (el.type==="checkbox") ? el.checked : el.value;
+  }else return;
   await depoYaz("defter",defter);
-  defterBas(); hedefBas(); toast(defter.length+" liste deftere yazıldı — her birinin ayarı ayrı.");
-  $("defterAyar").scrollIntoView({behavior:"smooth",block:"center"});
-}
-function defterBas(){
-  $("defterAyar").innerHTML=defter.length? defter.map((d,i)=>
-    "<div class='dsat'><div class='ad'>"+kacir(d.ad)+"</div>"+
-    "<select data-i='"+i+"' data-a='rol'>"+
-      ["AKIŞ","STOK"].map(x=>"<option "+(d.rol===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
-    "<select data-i='"+i+"' data-a='ritim'>"+
-      ["haftalık","aylık","3 aylık"].map(x=>"<option "+(d.ritim===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
-    "<label class='kilit'><input type='checkbox' data-i='"+i+"' data-a='yazma' "+(d.yazma?"checked":"")+
-      ">yazma</label></div>").join("")
-    : "<p class='ipucu'>Defter boş.</p>";
-}
-async function defterDegis(el){
-  const i=+el.dataset.i, a=el.dataset.a;
-  defter[i][a]= el.type==="checkbox" ? el.checked : el.value;
-  await depoYaz("defter",defter); hedefBas();
-}
-function secDoldur(id,kilitGoster){
-  const el=$(id); if(!el)return;
-  const tut=el.value;
-  el.innerHTML= defter.length
-    ? defter.map(d=>"<option value='"+d.id+"'>"+kacir(d.ad)+((kilitGoster&&!d.yazma)?" (kilitli)":"")+"</option>").join("")
-    : "<option value=''>— defter boş, Ayar > Liste Defteri —</option>";
-  if(defter.some(d=>d.id===tut))el.value=tut;
-}
-function hedefBas(){
-  secDoldur("kurHedef",true);
-  secDoldur("kaynakLink",false);
-  secDoldur("hedefLink",true);
-  hedefBilgi();
-}
-function hedefKayit(){return defter.find(d=>d.id===$("kurHedef").value)||null;}
-function hedefBilgi(){
-  const d=hedefKayit();
-  $("kurHedefBilgi").innerHTML = d
-    ? (d.rol+" · "+d.ritim+" · yazma "+(d.yazma?"<b style='color:var(--yesil)'>açık</b>":"<b style='color:var(--kirmizi)'>kilitli</b> — Ayar > Liste Defteri"))
-    : "Ayar sekmesinden liste defterini kur.";
+  defterCiz(); hedefBas();
 }
 
 /* ================= METİNDEN LİSTE KUR (v1.6) ================= */
@@ -919,12 +910,9 @@ function adresKopyala(){
   defter=await depoAl("defter",[]);
   if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
     if(id)defter=[{id:id,ad:"Ana liste (ayardan)",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
-  defterBas(); hedefBas();
+  defterCiz(); hedefBas();
   $("kurHedef").addEventListener("change",hedefBilgi);
-  $("defterBtnKaydet").addEventListener("click",defterKaydet);
-  $("defterAyar").addEventListener("change",function(e){
-    const el=e.target; if(el.dataset && el.dataset.i!==undefined) defterDegis(el);
-  });
+  $("defterSec").addEventListener("change",function(e){ defterDokun(e.target); });
   kpiTabloBas(await depoAl("kpi",[]));
   watchBas(await depoAl("watch",[]));
   yedekBas(await depoAl("yedekler",[]));
