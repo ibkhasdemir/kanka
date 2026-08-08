@@ -162,7 +162,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.3</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.4</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -271,8 +271,14 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     <p class="ipucu"><b>iOS'ta ana ekran uygulamasının deposu Safari'den ayrıdır</b> — ikondan açınca veriler boş görünür. Çözüm: Safari'de "Ayarları kopyala" de, ikondan aç, aşağıya yapıştır. Defter, KPI geçmişi <b>ve Spotify oturumu</b> taşınır, tekrar giriş yapmazsın.</p>
     <p class="ipucu" id="cihazBilgi"></p>
     <p class="ipucu" id="depoBilgi"></p>
-    <button onclick="ayarDisaAktar()">Ayarları kopyala</button>
-    <label>Geri yükle (kopyaladığın metni yapıştır)</label>
+    <button onclick="ayarDisaAktar()">① Ayarları kopyala (panoya)</button>
+    <p class="ipucu">Küçük paket: ayarlar, defter, KPI, oturum. Cihaz taşımak için bu yeter.</p>
+    <button class="amber" onclick="tamYedekIndir()">② TAM yedek indir (kasa dahil)</button>
+    <p class="ipucu" id="tamBilgi">Kasadaki şarkı yedekleri de dahil. Dosya olarak iner, Dosyalar'a kaydet.</p>
+    <div style="height:1px;background:var(--cizgi);margin:14px 0"></div>
+    <label>Geri yükle — dosyadan</label>
+    <input type="file" id="ayarDosya" accept=".json,application/json" onchange="dosyadanYukle(this)">
+    <label style="margin-top:10px">Geri yükle — metinden</label>
     <textarea id="ayarIceri" rows="3" placeholder='{"defter":[...]}'></textarea>
     <button class="ana" onclick="ayarIceAktar()">Bu metinden geri yükle</button>
   </div>
@@ -766,7 +772,7 @@ async function yedekAl(hedefId,goster){
     y.unshift({t:bugun()+" "+saat(),ad:m.ad,id:id,parcalar:p});
     if(y.length>12)y=y.slice(0,12);
     await depoYaz("yedekler",y);
-    yedekBas(y); depoBilgiBas();
+    yedekBas(y); depoBilgiBas(); tamBilgiBas();
     if(goster)toast("Yedek kasada: "+p.length+" parça");
     return p;
   }catch(e){ toast(e.message); if(e && /^KISIT/.test(e.message))throw e; return null; }
@@ -842,13 +848,36 @@ async function aktar(){
 }
 
 async function ayarDisaAktar(){
-  const paket={surum:"3.2", tarih:bugun()+" "+saat(),
-    ayar:await depoAl("ayar",{}), defter:await depoAl("defter",[]),
-    kpiCok:await depoAl("kpiCok",{}), kpi:await depoAl("kpi",[]), watch:await depoAl("watch",[]),
-    auth:await depoAl("auth",null), yedekler:[]};        // oturum anahtarı dahil — giriş gerekmesin
+  const paket=await paketKur(false);
   const metin=JSON.stringify(paket);
   try{ await navigator.clipboard.writeText(metin); toast("Kopyalandı (oturum anahtarı dahil) — kendi notuna yapıştır, kimseyle paylaşma."); }
   catch(e){ $("ayarIceri").value=metin; toast("Kopyalanamadı — aşağıdaki kutudan elle kopyala."); }
+}
+async function paketKur(kasaDahil){
+  return {surum:"3.4", tarih:bugun()+" "+saat(), kasaDahil:!!kasaDahil,
+    ayar:await depoAl("ayar",{}), defter:await depoAl("defter",[]),
+    kpiCok:await depoAl("kpiCok",{}), kpi:await depoAl("kpi",[]),
+    watch:await depoAl("watch",[]), auth:await depoAl("auth",null),
+    yedekler: kasaDahil ? await depoAl("yedekler",[]) : []};
+}
+async function tamYedekIndir(){
+  try{
+    const paket=await paketKur(true);
+    const metin="\uFEFF"+JSON.stringify(paket);
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([metin],{type:"application/json;charset=utf-8"}));
+    a.download="KANKA-tam-yedek-"+bugun()+".json"; a.click();
+    const mb=(metin.length/1048576).toFixed(2);
+    toast("İndi: "+paket.yedekler.length+" kasa kaydı, "+mb+" MB");
+  }catch(e){toast(e.message);}
+}
+function dosyadanYukle(el){
+  const f=el.files&&el.files[0]; if(!f)return;
+  const okuyucu=new FileReader();
+  okuyucu.onload=function(){ $("ayarIceri").value=String(okuyucu.result||"").replace(/^\uFEFF/,"");
+    toast("Dosya okundu — 'Bu metinden geri yükle'ye bas."); };
+  okuyucu.onerror=function(){ toast("Dosya okunamadı."); };
+  okuyucu.readAsText(f);
 }
 async function ayarIceAktar(){
   try{
@@ -861,9 +890,21 @@ async function ayarIceAktar(){
     if(p.kpi)await depoYaz("kpi",p.kpi);
     if(p.watch)await depoYaz("watch",p.watch);
     if(p.auth&&p.auth.rt)await depoYaz("auth",p.auth);   // Spotify oturumu da taşınsın
-    toast("Geri yüklendi ("+p.defter.length+" liste)"+(p.auth&&p.auth.rt?" + oturum":"")+". Yenileniyor…");
+    if(p.yedekler&&p.yedekler.length){
+      const yazildi=await depoYaz("yedekler",p.yedekler);
+      if(!yazildi)toast("Kasa sığmadı — ayarlar yüklendi, yedekler atlandı.");
+    }
+    toast("Geri yüklendi: "+p.defter.length+" liste"+(p.auth&&p.auth.rt?" + oturum":"")+
+          ((p.yedekler&&p.yedekler.length)?" + "+p.yedekler.length+" kasa kaydı":"")+". Yenileniyor…");
     setTimeout(()=>location.reload(),1200);
   }catch(e){toast(e.message);}
+}
+async function tamBilgiBas(){
+  const el=$("tamBilgi"); if(!el)return;
+  const y=await depoAl("yedekler",[]);
+  let bayt=0; try{ bayt=(localStorage.getItem("kanka_yedekler")||"").length; }catch(e){}
+  el.innerHTML="Kasada <b>"+y.length+"</b> kayıt · yaklaşık <b>"+(bayt/1048576).toFixed(2)+
+    " MB</b>. Dosya olarak iner, Dosyalar'a kaydet.";
 }
 function cihazBilgiBas(){
   const el=$("cihazBilgi"); if(!el)return;
@@ -1224,7 +1265,7 @@ function adresKopyala(){
   defter=await depoAl("defter",[]);
   if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
     if(id)defter=[{id:id,ad:"Ana liste (ayardan)",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
-  defterCiz(); hedefBas(); depoBilgiBas(); cihazBilgiBas();
+  defterCiz(); hedefBas(); depoBilgiBas(); cihazBilgiBas(); tamBilgiBas();
   $("kurHedef").addEventListener("change",hedefBilgi);
   $("defterSec").addEventListener("change",function(e){ defterDokun(e.target); });
   kpiTabloBas(await depoAl("kpi",[]));
