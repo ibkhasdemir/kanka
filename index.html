@@ -79,11 +79,70 @@ nav button.secili{color:var(--vurgu)}
 .bosluk{color:var(--soluk); text-align:center; padding:26px 10px; font-size:14px}
 a{color:var(--amber)}
 @media (prefers-reduced-motion: reduce){ .sekme.acik{animation:none} }
+
+/* ============ v1.6 ============ */
+select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(--cizgi);
+  border-radius:10px;padding:11px 12px;font:15px inherit;font-family:inherit}
+.rozet{display:inline-block;font-size:11px;padding:1px 7px;border-radius:20px;border:1px solid var(--cizgi);color:var(--soluk)}
+.rozet.k{color:var(--yesil);border-color:#3adf7c55}
+.rozet.s{color:var(--amber);border-color:#ffc94d55}
+.rozet.y{color:var(--kirmizi);border-color:#ff5c5c66}
+.msat{border-bottom:1px solid var(--cizgi);padding:9px 0;display:flex;gap:9px;align-items:flex-start}
+.msat:last-child{border-bottom:0}
+.msat.kapali{opacity:.32}
+.msat .no{font-size:12px;color:var(--soluk);flex:0 0 26px;padding-top:2px}
+.msat .gv{flex:1;min-width:0}
+.msat .ist{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msat .bul{font-size:12px;color:var(--soluk);margin-top:2px}
+.msat .bul.fark{color:var(--amber)}
+.msat .dug{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.msat .dug button{background:none;border:1px solid var(--cizgi);color:var(--soluk);border-radius:6px;
+  font-size:10px;padding:3px 7px;font-family:inherit;cursor:pointer;width:auto;margin:0}
+.secenek{margin-top:7px;display:none;flex-direction:column;gap:5px}
+.secenek.acik{display:flex}
+.secenek button{text-align:left;background:#0F0B18;border:1px solid var(--cizgi);color:var(--murekkep);
+  border-radius:8px;padding:7px 9px;font-size:12px;font-family:inherit;cursor:pointer;width:100%;margin:0}
+.suzgec{display:flex;gap:6px;margin:10px 0}
+.suzgec button{flex:1;background:#0F0B18;border:1px solid var(--cizgi);color:var(--soluk);
+  border-radius:8px;padding:7px;font-size:12px;font-family:inherit;margin:0;width:auto}
+.suzgec button.acik{border-color:var(--amber);color:var(--amber)}
+.dsat{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--cizgi)}
+.dsat .ad{grid-column:1/-1;font-size:14px}
+.dsat select{padding:7px 9px;font-size:13px}
+.kilit{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--soluk);white-space:nowrap}
+.kilit input{width:18px;height:18px;accent-color:var(--kirmizi)}
+.secsat{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cizgi)}
+.secsat input{width:22px;height:22px;flex:0 0 22px;accent-color:var(--vurgu)}
+.secsat b{font-weight:500;font-size:14px}
+
+/* --- ÜZERİNE YAZMA KAPISI --- */
+#kapi{position:fixed;inset:0;z-index:60;background:#06040Bee;display:none;
+  align-items:flex-end;justify-content:center}
+#kapi.acik{display:flex}
+#kapi .sayfa{width:100%;max-width:560px;background:var(--kart);border-top:2px solid var(--kirmizi);
+  border-radius:20px 20px 0 0;padding:0 18px calc(20px + env(safe-area-inset-bottom));
+  max-height:92dvh;overflow:auto}
+.serit{height:14px;margin:0 -18px 18px;
+  background:repeating-linear-gradient(45deg,var(--kirmizi) 0 11px,var(--kart) 11px 22px)}
+#kapi .ust{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--kirmizi)}
+#kapiAd{font-family:'Anton',Impact,sans-serif;font-size:28px;line-height:1.1;
+  letter-spacing:1px;margin:6px 0 16px;word-break:break-word}
+.olcek{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.olcek .kutu{flex:1;text-align:center;border:1px solid var(--cizgi);border-radius:12px;padding:11px}
+.olcek .kutu b{display:block;font-family:'Anton',Impact,sans-serif;font-size:26px;line-height:1}
+.olcek .kutu small{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--soluk)}
+.olcek .eski b{color:var(--soluk);text-decoration:line-through;text-decoration-color:var(--kirmizi)}
+.olcek .yeni b{color:var(--amber)}
+.olcek .ok{color:var(--soluk);font-size:20px}
+#kapi ul{margin:0 0 14px;padding-left:18px;font-size:13px;color:var(--soluk)}
+#kapi ul li{margin-bottom:5px}
+#kapi ul li b{color:var(--murekkep)}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.5</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.6</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -130,10 +189,10 @@ a{color:var(--amber)}
 <section id="s-aktar" class="sekme">
   <div class="kart">
     <h2>Aktar (gizli → ana)</h2>
-    <label>Kaynak (boş = gizli liste)</label>
-    <input type="text" id="kaynakLink" placeholder="gizli liste">
-    <label>Hedef (boş = ana liste)</label>
-    <input type="text" id="hedefLink" placeholder="ana liste">
+    <label>Kaynak liste</label>
+    <select id="kaynakLink"></select>
+    <label>Hedef liste (üzerine yazılacak)</label>
+    <select id="hedefLink"></select>
     <button onclick="fark()">Önizle (fark analizi)</button>
     <div id="farkSonuc"></div>
     <button class="tehlike" onclick="aktar()">AKTAR — hedefin üzerine yaz</button>
@@ -143,9 +202,15 @@ a{color:var(--amber)}
     <h2>🪄 Metinden Liste Kur</h2>
     <p class="ipucu">Claude'un yazdığı listeyi buraya yapıştır — şarkıları Spotify'da kendim bulur, sırasıyla listeye yazarım. Amele modu kapandı.</p>
     <textarea id="metinListe" placeholder="1. Şarkı — Sanatçı&#10;2. Şarkı — Sanatçı&#10;..."></textarea>
-    <label>Hedef liste (boş = gizli liste, o da yoksa ana)</label>
-    <input type="text" id="kurHedef" placeholder="https://open.spotify.com/playlist/...">
+    <label>Hedef liste</label>
+    <select id="kurHedef"></select>
+    <p class="ipucu" id="kurHedefBilgi"></p>
     <button class="amber" onclick="metindenBul()">① Şarkıları bul</button>
+    <div class="suzgec" id="kurSuzgec" style="display:none">
+      <button class="acik" onclick="kurSuz('hepsi',this)">Hepsi</button>
+      <button onclick="kurSuz('supheli',this)">Şüpheli</button>
+      <button onclick="kurSuz('yok',this)">Bulunamadı</button>
+    </div>
     <div id="kurOnizleme"></div>
     <button class="ana" onclick="metindenYaz()">② Listeye yaz</button>
   </div>
@@ -178,6 +243,14 @@ a{color:var(--amber)}
     <button onclick="cikis()">Bağlantıyı kes</button>
   </div>
   <div class="kart">
+    <h2>Liste Defteri</h2>
+    <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b>Yazma kilidi</b> kapalıyken o listeye hiçbir şey yazılamaz.</p>
+    <button onclick="listeleriCek()">Listelerimi çek</button>
+    <div id="defterSec"></div>
+    <button class="ana" id="defterKaydet" style="display:none" onclick="defterKaydet()">Seçimi kaydet</button>
+    <div id="defterAyar"></div>
+  </div>
+  <div class="kart">
     <h2>Kurulum (tek seferlik)</h2>
     <p class="ipucu">1) Bu sayfanın adresini kopyala, developer.spotify.com → uygulaman → Settings → <b>Redirect URIs</b>'e ekle, kaydet:</p>
     <input type="text" id="benimAdres" readonly>
@@ -197,6 +270,27 @@ a{color:var(--amber)}
   <button data-s="yedek" onclick="sekme('yedek',this)"><span class="ik">🗄️</span>Yedek</button>
   <button data-s="ayar" onclick="sekme('ayar',this)"><span class="ik">⚙️</span>Ayar</button>
 </nav>
+<div id="kapi">
+  <div class="sayfa">
+    <div class="serit"></div>
+    <div class="ust">üzerine yazılacak liste</div>
+    <div id="kapiAd"></div>
+    <div class="olcek">
+      <div class="kutu eski"><b id="kapiEski">—</b><small>şu an</small></div>
+      <div class="ok">→</div>
+      <div class="kutu yeni"><b id="kapiYeni">—</b><small>sonra</small></div>
+    </div>
+    <ul>
+      <li>Listedeki <b>mevcut şarkıların hepsi silinir</b>, yerine bu sıra yazılır.</li>
+      <li>Yazmadan önce <b>yedek alınır</b> — Yedek sekmesinden geri dönersin.</li>
+      <li id="kapiAtla"></li>
+    </ul>
+    <button class="tehlike" id="kapiEvet" onclick="kapiYaz()">Evet, üzerine yaz</button>
+    <button id="kapiHayir" onclick="kapiKapat()">Vazgeç</button>
+    <p class="ipucu" id="kapiDurum" style="text-align:center"></p>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -491,9 +585,9 @@ async function geriYukle(i){
 /* ================= AKTAR ================= */
 async function fark(){
   try{
-    const k=pid($("kaynakLink").value)||pid(ayar.gizli);
-    const h=pid($("hedefLink").value)||pid(ayar.ana);
-    if(!k||!h)throw new Error("Kaynak ve hedef gerekli.");
+    const k=$("kaynakLink").value, h=$("hedefLink").value;
+    if(!k||!h)throw new Error("Kaynak ve hedef seç — Ayar > Liste Defteri.");
+    if(k===h)throw new Error("Kaynak ve hedef aynı liste. Farklı iki liste seç.");
     const kp=await parcalar(k), hp=await parcalar(h);
     const hset=new Map(hp.map((x,i)=>[x.uri,i]));
     const kset=new Map(kp.map((x,i)=>[x.uri,i]));
@@ -507,82 +601,247 @@ async function fark(){
 }
 async function aktar(){
   try{
-    const k=pid($("kaynakLink").value)||pid(ayar.gizli);
-    const h=pid($("hedefLink").value)||pid(ayar.ana);
-    if(!k||!h)throw new Error("Kaynak ve hedef gerekli.");
+    const k=$("kaynakLink").value;
+    const d=defter.find(x=>x.id===$("hedefLink").value);
+    if(!k||!d)throw new Error("Kaynak ve hedef seç — Ayar > Liste Defteri.");
+    if(k===d.id)throw new Error("Kaynak ve hedef aynı liste. Farklı iki liste seç.");
+    if(!d.yazma)throw new Error("'"+d.ad+"' listesinde yazma kilidi kapalı — Ayar > Liste Defteri.");
     const kp=await parcalar(k);
     if(!kp.length)throw new Error("Kaynak boş.");
-    if(!confirm("Hedef listenin içeriği silinip yerine "+kp.length+" parça yazılacak. Onay?"))return;
-    await yedekAl(h,false);
-    await listeyeYaz(h,kp.map(x=>x.uri));
-    toast("Aktarım tamam: "+kp.length+" parça 🎉");
+    await kapiAc(d, kp.map(x=>x.uri), kp.length);
   }catch(e){toast(e.message);}
 }
 
-/* ================= METİNDEN LİSTE KUR ================= */
-let kurSonuc=[];
+/* ================= LİSTE DEFTERİ (v1.6) ================= */
+let defter=[], cekilen=[];
+
+async function listeleriCek(){
+  try{
+    if(!await hazir())throw new Error("Bağlı değilsin — önce Spotify'a bağlan.");
+    const ben=await api("/me");
+    let url="/me/playlists?limit=50", hepsi=[];
+    while(url){const j=await api(url); hepsi=hepsi.concat(j.items||[]); url=j.next; if(hepsi.length>300)break;}
+    cekilen=hepsi.filter(p=>p&&p.owner&&p.owner.id===ben.id);
+    $("defterSec").innerHTML=cekilen.length? cekilen.map(p=>{
+      const v=defter.some(d=>d.id===p.id);
+      return "<div class='secsat'><input type='checkbox' data-id='"+p.id+"' "+(v?"checked":"")+
+        "><div><b>"+kacir(p.name)+"</b><br><span class='ipucu'>"+((p.tracks&&p.tracks.total)||0)+" şarkı</span></div></div>";
+    }).join("") : "<p class='ipucu'>Kendi listen bulunamadı.</p>";
+    $("defterKaydet").style.display="block";
+  }catch(e){toast(e.message);}
+}
+function kacir(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+async function defterKaydet(){
+  const idler=Array.from(document.querySelectorAll("#defterSec input:checked")).map(i=>i.dataset.id);
+  defter=idler.map(id=>{
+    const eski=defter.find(d=>d.id===id), p=cekilen.find(x=>x.id===id);
+    return eski||{id:id, ad:(p&&p.name)||id, rol:"AKIŞ", ritim:"haftalık", yazma:false};
+  });
+  await depoYaz("defter",defter);
+  defterBas(); hedefBas(); toast(defter.length+" liste deftere yazıldı.");
+}
+function defterBas(){
+  $("defterAyar").innerHTML=defter.length? defter.map((d,i)=>
+    "<div class='dsat'><div class='ad'>"+kacir(d.ad)+"</div>"+
+    "<select data-i='"+i+"' data-a='rol' onchange='defterDegis(this)'>"+
+      ["AKIŞ","STOK"].map(x=>"<option "+(d.rol===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
+    "<select data-i='"+i+"' data-a='ritim' onchange='defterDegis(this)'>"+
+      ["haftalık","aylık","3 aylık"].map(x=>"<option "+(d.ritim===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
+    "<label class='kilit'><input type='checkbox' data-i='"+i+"' data-a='yazma' "+(d.yazma?"checked":"")+
+      " onchange='defterDegis(this)'>yazma</label></div>").join("")
+    : "<p class='ipucu'>Defter boş.</p>";
+}
+async function defterDegis(el){
+  const i=+el.dataset.i, a=el.dataset.a;
+  defter[i][a]= el.type==="checkbox" ? el.checked : el.value;
+  await depoYaz("defter",defter); hedefBas();
+}
+function secDoldur(id,kilitGoster){
+  const el=$(id); if(!el)return;
+  const tut=el.value;
+  el.innerHTML= defter.length
+    ? defter.map(d=>"<option value='"+d.id+"'>"+kacir(d.ad)+((kilitGoster&&!d.yazma)?" (kilitli)":"")+"</option>").join("")
+    : "<option value=''>— defter boş, Ayar > Liste Defteri —</option>";
+  if(defter.some(d=>d.id===tut))el.value=tut;
+}
+function hedefBas(){
+  secDoldur("kurHedef",true);
+  secDoldur("kaynakLink",false);
+  secDoldur("hedefLink",true);
+  hedefBilgi();
+}
+function hedefKayit(){return defter.find(d=>d.id===$("kurHedef").value)||null;}
+function hedefBilgi(){
+  const d=hedefKayit();
+  $("kurHedefBilgi").innerHTML = d
+    ? (d.rol+" · "+d.ritim+" · yazma "+(d.yazma?"<b style='color:var(--yesil)'>açık</b>":"<b style='color:var(--kirmizi)'>kilitli</b> — Ayar > Liste Defteri"))
+    : "Ayar sekmesinden liste defterini kur.";
+}
+
+/* ================= METİNDEN LİSTE KUR (v1.6) ================= */
+let kurSonuc=[], kurFiltre="hepsi";
+
 function satirAyikla(metin){
-  metin=metin.replace(/\s·\s/g,"\n");
+  metin=String(metin||"").replace(/```/g,"").replace(/\s·\s/g,"\n");
   const sonuc=[];
   for(let s of metin.split("\n")){
     s=s.trim();
     if(!s||s.startsWith("■")||s.startsWith("#"))continue;
     s=s.replace(/\*+/g,"");
-    s=s.replace(/\([^)]*\)/g,"");
     s=s.replace(/^\d+[\.\):：]?\s*/,"");
     s=s.replace(/[\u{1F100}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu," ");
     s=s.replace(/[✕✗✓⚠🔒]/g," ");
     s=s.replace(/\s+/g," ").trim();
     if(s.length<3||!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(s))continue;
-    sonuc.push({etiket:s,sorgu:s.replace(/[—–|]/g," ")});
+    let kes=-1,uz=0;
+    [" — "," – "," - "," | "].forEach(a=>{const i=s.lastIndexOf(a); if(i>kes){kes=i;uz=a.length;}});
+    if(kes<0){const i=s.lastIndexOf("—"); if(i>0){kes=i;uz=1;}}
+    const sarki  = kes<0? s : s.slice(0,kes).trim();
+    const sanatci= kes<0? "" : s.slice(kes+uz).trim();
+    if(!sarki)continue;
+    sonuc.push({etiket:s, sarki:sarki, sanatci:sanatci});
   }
   return sonuc;
 }
+function katla(s){
+  return String(s||"").toLowerCase()
+    .replace(/ı/g,"i").replace(/İ/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g")
+    .replace(/ü/g,"u").replace(/ö/g,"o").replace(/ç/g,"c")
+    .replace(/\(.*?\)|\[.*?\]/g," ").replace(/feat\.?|ft\.?/g," ")
+    .replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+}
+function benzer(a,b){
+  a=katla(a); b=katla(b); if(!a||!b)return 0; if(a===b)return 1;
+  const ik=t=>{const o=new Set();for(let i=0;i<t.length-1;i++)o.add(t.slice(i,i+2));return o;};
+  const A=ik(a),B=ik(b); let v=0; A.forEach(x=>{if(B.has(x))v++;});
+  return (2*v)/((A.size+B.size)||1);
+}
+async function kurAra(q){
+  const j=await api("/search?type=track&limit=5&market=TR&q="+encodeURIComponent(q));
+  const l=(j.tracks&&j.tracks.items)||j.items||[];
+  return l.map(t=>({uri:t.uri, sarki:t.name, sanatci:(t.artists||[]).map(x=>x.name).join(", ")}));
+}
+function kurPuan(r){
+  if(!r.adaylar.length)return {d:"yok", s:null};
+  const p=r.adaylar.map(c=>({c:c, p:benzer(r.sarki,c.sarki)*0.68 + (r.sanatci? benzer(r.sanatci,c.sanatci)*0.32 : 0.32)}))
+                   .sort((a,b)=>b.p-a.p);
+  const t=p[0].c;
+  const sOk=benzer(r.sarki,t.sarki)>=0.72;
+  const aOk=!r.sanatci || benzer(r.sanatci,t.sanatci)>=0.55;
+  return {d:(sOk&&aOk)?"kesin":"supheli", s:t};
+}
 async function metindenBul(){
   try{
+    if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
     const adaylar=satirAyikla($("metinListe").value||"");
     if(!adaylar.length){toast("Liste metni boş görünüyor.");return;}
-    kurSonuc=[];
-    for(let i=0;i<adaylar.length;i++){
-      const a=adaylar[i];
-      $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+(i+1)+"/"+adaylar.length+" — "+a.etiket.slice(0,40)+"</p>";
-      try{
-        const j=await api("/search?type=track&limit=3&market=TR&q="+encodeURIComponent(a.sorgu));
-        const liste=(j.tracks&&j.tracks.items)||j.items||[];
-        const t=liste[0];
-        if(t)kurSonuc.push({ok:true,etiket:a.etiket,uri:t.uri,
-          bulunan:(t.artists||[]).map(x=>x.name).join(", ")+" — "+t.name});
-        else kurSonuc.push({ok:false,etiket:a.etiket});
-      }catch(e){kurSonuc.push({ok:false,etiket:a.etiket,hata:e.message});}
-    }
+    kurSonuc=adaylar.map(a=>Object.assign({},a,{adaylar:[],uri:null,bulunan:"",durum:"bekle",kullan:true}));
+    $("kurSuzgec").style.display="none";
+    let bitti=0;
+    const isci=async function(){
+      while(true){
+        const i=kurSonuc.findIndex(x=>x.durum==="bekle"&&!x.mesgul);
+        if(i<0)return;
+        const r=kurSonuc[i]; r.mesgul=true;
+        try{
+          let c=await kurAra('track:"'+r.sarki+'"'+(r.sanatci?' artist:"'+r.sanatci+'"':""));
+          if(!c.length)c=await kurAra((r.sarki+" "+r.sanatci).trim());
+          r.adaylar=c;
+          const g=kurPuan(r); r.durum=g.d; r.uri=g.s?g.s.uri:null;
+          r.bulunan=g.s?(g.s.sarki+" · "+g.s.sanatci):"";
+        }catch(e){ r.durum="yok"; r.hata=e.message; }
+        r.kullan=(r.durum!=="yok");
+        bitti++;
+        $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+bitti+"/"+kurSonuc.length+"</p>";
+        await new Promise(x=>setTimeout(x,80));
+      }
+    };
+    await Promise.all([isci(),isci(),isci()]);
+    $("kurSuzgec").style.display="flex";
     kurCiz();
   }catch(e){toast(e.message);}
 }
+function kurSuz(f,btn){
+  kurFiltre=f;
+  Array.from(document.querySelectorAll("#kurSuzgec button")).forEach(b=>b.classList.remove("acik"));
+  if(btn)btn.classList.add("acik");
+  kurCiz();
+}
 function kurCiz(){
-  const b=kurSonuc.filter(x=>x.ok).length,yok=kurSonuc.filter(x=>!x.ok).length;
-  let h="<p><b class='arti'>✓ "+b+" eşleşti</b>"+(yok?"  <b class='eksi'>✗ "+yok+" bulunamadı</b>":"")+"</p>";
-  h+=kurSonuc.map((x,i)=>x.ok?
-    "<p style='font-size:13px'>"+(i+1)+". "+x.bulunan+
-    " <a href='#' onclick='kurSil("+i+");return false'>✕</a></p>":
-    "<p style='font-size:13px' class='eksi'>"+(i+1)+". "+x.etiket+" — bulunamadı"+
-    (x.hata?" ("+x.hata+")":"")+", atlanacak</p>").join("");
-  h+="<p class='ipucu'>Yanlış eşleşeni ✕ ile çıkar, sonra ② ile yaz.</p>";
+  const say={kesin:0,supheli:0,yok:0};
+  kurSonuc.forEach(r=>{if(say[r.durum]!==undefined)say[r.durum]++;});
+  let h="<p><b class='arti'>✓ "+say.kesin+" kesin</b>"+
+        (say.supheli?"  <b style='color:var(--amber)'>⚠ "+say.supheli+" şüpheli</b>":"")+
+        (say.yok?"  <b class='eksi'>✗ "+say.yok+" bulunamadı</b>":"")+"</p>";
+  const gor=kurSonuc.map((r,i)=>({r:r,i:i})).filter(x=>kurFiltre==="hepsi"||x.r.durum===kurFiltre);
+  h+= gor.length? gor.map(function(x){
+    const r=x.r, i=x.i;
+    const rz = r.durum==="kesin"?"<span class='rozet k'>kesin</span>"
+             : r.durum==="supheli"?"<span class='rozet s'>şüpheli</span>"
+             : "<span class='rozet y'>yok</span>";
+    const fark = r.uri && (benzer(r.sarki,r.bulunan.split(" · ")[0])<0.95);
+    return "<div class='msat"+(r.kullan?"":" kapali")+"'>"+
+      "<div class='no'>"+(i+1)+"</div><div class='gv'>"+
+        "<div class='ist'>"+kacir(r.sarki)+(r.sanatci?" <span class='ipucu'>— "+kacir(r.sanatci)+"</span>":"")+"</div>"+
+        "<div class='bul"+(fark?" fark":"")+"'>"+(r.uri?"→ "+kacir(r.bulunan):"eşleşme yok"+(r.hata?" ("+kacir(r.hata)+")":""))+"</div>"+
+        (r.adaylar.length>1?"<div class='secenek' id='sec"+i+"'>"+r.adaylar.map((c,k)=>
+          "<button onclick='kurSec("+i+","+k+")'>"+kacir(c.sarki)+" · <span class='ipucu'>"+kacir(c.sanatci)+"</span></button>").join("")+"</div>":"")+
+      "</div><div class='dug'>"+rz+
+        "<button onclick='kurAlma("+i+")'>"+(r.kullan?"çıkar":"ekle")+"</button>"+
+        (r.adaylar.length>1?"<button onclick='kurAc("+i+")'>seç</button>":"")+
+      "</div></div>";
+  }).join("") : "<p class='ipucu'>Bu süzgeçte satır yok.</p>";
+  const n=kurSonuc.filter(r=>r.kullan&&r.uri).length, atl=kurSonuc.length-n;
+  h+="<p class='ipucu'>"+n+" şarkı yazılacak"+(atl?" · "+atl+" satır atlanacak":"")+"</p>";
   $("kurOnizleme").innerHTML=h;
 }
+function kurAc(i){const e=$("sec"+i); if(e)e.classList.toggle("acik");}
+function kurAlma(i){const r=kurSonuc[i]; r.kullan=(!r.kullan&&!!r.uri); kurCiz();}
+function kurSec(i,k){const r=kurSonuc[i], c=r.adaylar[k]; if(!c)return;
+  r.uri=c.uri; r.bulunan=c.sarki+" · "+c.sanatci; r.durum="kesin"; r.kullan=true; kurCiz();}
 function kurSil(i){kurSonuc.splice(i,1);kurCiz();}
+
+/* ================= ÜZERİNE YAZMA KAPISI ================= */
+let KAPI=null;
 async function metindenYaz(){
+  const uriler=kurSonuc.filter(x=>x.kullan&&x.uri).map(x=>x.uri);
+  if(!uriler.length){toast("Önce ① ile şarkıları bul.");return;}
+  const d=hedefKayit();
+  if(!d){toast("Hedef yok — Ayar > Liste Defteri'nden liste seç.");return;}
+  if(!d.yazma){toast("'"+d.ad+"' listesinde yazma kilidi kapalı.");return;}
+  await kapiAc(d,uriler,kurSonuc.length);
+}
+async function kapiAc(d,uriler,toplam){
+  KAPI={d:d,uriler:uriler,mevcut:null};
+  $("kapiAd").textContent=d.ad;
+  $("kapiYeni").textContent=uriler.length;
+  $("kapiEski").textContent="…";
+  const atl=(toplam===undefined?kurSonuc.length:toplam)-uriler.length;
+  $("kapiAtla").innerHTML= atl? ("<b>"+atl+" satır</b> eşleşmediği için atlanacak.") : "Bütün satırlar eşleşti.";
+  $("kapiEvet").disabled=true; $("kapiDurum").textContent="mevcut liste okunuyor…";
+  $("kapi").classList.add("acik");
   try{
-    const uriler=kurSonuc.filter(x=>x.ok).map(x=>x.uri);
-    if(!uriler.length){toast("Önce ① ile şarkıları bul.");return;}
-    const hp=pid($("kurHedef").value)||pid(ayar.gizli)||pid(ayar.ana);
-    if(!hp){toast("Hedef yok — Ayar'dan gizli ya da ana liste gir.");return;}
-    const m=await listeMeta(hp);
-    if(!confirm("'"+m.ad+"' listesinin içeriği silinip yerine "+uriler.length+
-      " şarkı bu sırayla yazılacak. Onay?"))return;
-    await yedekAl(hp,false);
-    await listeyeYaz(hp,uriler);
-    toast("Liste kuruldu: "+uriler.length+" şarkı 🎉");
-  }catch(e){toast(e.message);}
+    const p=await parcalar(d.id);
+    KAPI.mevcut=p; $("kapiEski").textContent=p.length;
+    $("kapiDurum").textContent=""; $("kapiEvet").disabled=false;
+  }catch(e){ $("kapiDurum").textContent="Mevcut liste okunamadı: "+e.message; }
+}
+function kapiKapat(){$("kapi").classList.remove("acik");KAPI=null;}
+async function kapiYaz(){
+  if(!KAPI)return;
+  const d=KAPI.d, uriler=KAPI.uriler, mevcut=KAPI.mevcut||[];
+  $("kapiEvet").disabled=true; $("kapiHayir").disabled=true;
+  try{
+    let y=await depoAl("yedekler",[]);
+    y.unshift({t:bugun()+" "+saat(), ad:d.ad, id:d.id, parcalar:mevcut});
+    if(y.length>8)y=y.slice(0,8);
+    await depoYaz("yedekler",y); yedekBas(y);
+    $("kapiDurum").textContent="yedek alındı ("+mevcut.length+" parça), yazılıyor…";
+    await listeyeYaz(d.id,uriler);
+    kapiKapat();
+    toast(d.ad+": "+uriler.length+" şarkı yazıldı 🎉");
+  }catch(e){ $("kapiDurum").textContent="Yazma durdu: "+e.message+" — yedek kasada duruyor."; }
+  $("kapiEvet").disabled=false; $("kapiHayir").disabled=false;
 }
 
 /* ================= CUMA RUTİNİ ================= */
@@ -624,6 +883,11 @@ function adresKopyala(){
   $("aAna").value=ayar.ana||"";
   $("aGizli").value=ayar.gizli||"";
   $("benimAdres").value=adres();
+  defter=await depoAl("defter",[]);
+  if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
+    if(id)defter=[{id:id,ad:"Ana liste",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
+  defterBas(); hedefBas();
+  $("kurHedef").addEventListener("change",hedefBilgi);
   kpiTabloBas(await depoAl("kpi",[]));
   watchBas(await depoAl("watch",[]));
   yedekBas(await depoAl("yedekler",[]));
