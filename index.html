@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.4</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.5</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -411,7 +411,14 @@ async function api(yol,secenek){
   const r=await fetch(yol.startsWith("http")?yol:"https://api.spotify.com/v1"+yol,
     Object.assign({headers:{Authorization:"Bearer "+token,
       "Content-Type":"application/json"}},secenek||{}));
-  if(r.status===429){await new Promise(x=>setTimeout(x,1500));return api(yol,secenek);}
+  if(r.status===429){
+    const bekle=parseInt(r.headers.get("Retry-After")||"3",10);
+    const d=(secenek&&secenek.__deneme)||0;
+    if(d>=4||bekle>90)throw new Error("Spotify hız sınırı doldu ("+bekle+" sn). Biraz bekleyip tekrar dene.");
+    if(window.hizGoster)window.hizGoster(bekle);
+    await new Promise(x=>setTimeout(x,(bekle+1)*1000));
+    return api(yol,Object.assign({},secenek||{},{__deneme:d+1}));
+  }
   if(r.status===204)return {};
   const j=await r.json().catch(()=>({}));
   if(!r.ok){const yk=(yol.startsWith("http")?yol.replace("https://api.spotify.com/v1",""):yol).split("?")[0];
@@ -845,29 +852,39 @@ async function metindenBul(){
     if(!adaylar.length){toast("Liste metni boş görünüyor.");return;}
     kurSonuc=adaylar.map(a=>Object.assign({},a,{adaylar:[],uri:null,bulunan:"",durum:"bekle",kullan:true}));
     $("kurSuzgec").style.display="none";
-    let bitti=0;
-    const isci=async function(){
-      while(true){
-        const i=kurSonuc.findIndex(x=>x.durum==="bekle"&&!x.mesgul);
-        if(i<0)return;
-        const r=kurSonuc[i]; r.mesgul=true;
-        try{
-          let c=await kurAra('track:"'+r.sarki+'"'+(r.sanatci?' artist:"'+r.sanatci+'"':""));
-          if(!c.length)c=await kurAra((r.sarki+" "+r.sanatci).trim());
-          r.adaylar=c;
-          const g=kurPuan(r); r.durum=g.d; r.uri=g.s?g.s.uri:null;
-          r.bulunan=g.s?(g.s.sarki+" · "+g.s.sanatci):"";
-        }catch(e){ r.durum="yok"; r.hata=e.message; }
-        r.kullan=(r.durum!=="yok");
-        bitti++;
-        $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+bitti+"/"+kurSonuc.length+"</p>";
-        await new Promise(x=>setTimeout(x,80));
-      }
+    const n=kurSonuc.length;
+    let durdu=null;
+    window.hizGoster=function(sn){
+      $("kurOnizleme").innerHTML="<p class='ipucu' style='color:var(--amber)'>Spotify hız sınırı — "+sn+
+        " sn bekleniyor, sonra devam edecek. Sayfayı kapatma.</p>";
     };
-    await Promise.all([isci(),isci(),isci()]);
+    for(let i=0;i<n;i++){
+      const r=kurSonuc[i];
+      try{
+        let c=await kurAra('track:"'+r.sarki+'"'+(r.sanatci?' artist:"'+r.sanatci+'"':""));
+        if(!c.length){ await new Promise(x=>setTimeout(x,300));
+                       c=await kurAra((r.sarki+" "+r.sanatci).trim()); }
+        r.adaylar=c;
+        const g=kurPuan(r); r.durum=g.d; r.uri=g.s?g.s.uri:null;
+        r.bulunan=g.s?(g.s.sarki+" · "+g.s.sanatci):"";
+      }catch(e){
+        if(/hız sınırı/.test(e.message)){ durdu=e.message; break; }
+        r.durum="yok"; r.hata=e.message;
+      }
+      r.kullan=(r.durum!=="yok");
+      $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+(i+1)+"/"+n+" — "+kacir(r.sarki.slice(0,32))+"</p>";
+      await new Promise(x=>setTimeout(x,300));
+    }
+    window.hizGoster=null;
+    kurSonuc=kurSonuc.filter(x=>x.durum!=="bekle");
     $("kurSuzgec").style.display="flex";
     kurCiz();
-  }catch(e){toast(e.message);}
+    if(durdu){
+      $("kurOnizleme").innerHTML="<p class='ipucu' style='color:var(--kirmizi)'>"+kacir(durdu)+
+        "<br>İlk "+kurSonuc.length+" satır tarandı. Birkaç dakika sonra tekrar '① Şarkıları bul' de.</p>"+
+        $("kurOnizleme").innerHTML;
+    }
+  }catch(e){ window.hizGoster=null; toast(e.message); }
 }
 function kurSuz(f,btn){
   kurFiltre=f;
