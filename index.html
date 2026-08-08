@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.8</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.9</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -333,6 +333,8 @@ async function girisYap(){
   const dogrulayici=rastgele(48);
   await depoYaz("pkce",dogrulayici);
   const ozet=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(dogrulayici));
+  await depoYaz("sonGiris",{t:bugun()+" "+saat(), adres:adres(), durum:"bekliyor",
+    mesaj:"İzin ekranına gidildi, dönüş bekleniyor."});
   location.href="https://accounts.spotify.com/authorize?client_id="+ayar.client_id+
     "&response_type=code&redirect_uri="+encodeURIComponent(adres())+
     "&scope="+encodeURIComponent("playlist-read-private playlist-modify-public playlist-modify-private")+
@@ -375,6 +377,29 @@ async function hazir(){
   return await tokenTazele();
 }
 async function cikis(){token=null;await depoYaz("auth",{});bagliGoster(false);toast("Bağlantı kesildi.");}
+async function girisTanıBas(){
+  const d=await depoAl("sonGiris",null);
+  if(!d){$("girisAdim").innerHTML="";return;}
+  const renk = d.durum==="basarili"?"var(--yesil)":d.durum==="bekliyor"?"var(--amber)":"var(--kirmizi)";
+  const bas  = d.durum==="basarili"?"Son giriş: başarılı":d.durum==="bekliyor"?"Son giriş: yarım kaldı":"Son giriş: BAŞARISIZ";
+  $("girisAdim").innerHTML =
+    "<div style='border:1px solid var(--cizgi);border-radius:12px;padding:12px;margin-top:12px'>"+
+    "<b style='color:"+renk+"'>"+bas+"</b>"+
+    "<p class='ipucu' style='margin:6px 0 0'>Zaman: "+kacir(d.t)+"</p>"+
+    "<p class='ipucu' style='margin:4px 0 0;word-break:break-all'>Gönderilen adres:<br><b>"+kacir(d.adres)+"</b></p>"+
+    (d.mesaj?"<p class='ipucu' style='margin:6px 0 0'>Spotify'ın dediği:<br><b style='color:var(--murekkep)'>"+kacir(d.mesaj)+"</b></p>":"")+
+    (d.ipucu?"<p class='ipucu' style='margin:6px 0 0;color:var(--amber)'>→ "+kacir(d.ipucu)+"</p>":"")+
+    "</div>";
+}
+function hataIpucu(m){
+  m=String(m||"").toLowerCase();
+  if(m.includes("redirect")) return "Gönderilen adres Spotify'daki Redirect URI listesiyle harfi harfine aynı değil. Yukarıdaki adresi kopyalayıp panoya ekle.";
+  if(m.includes("doğrulayıcı")) return "İzin ekranından başka bir tarayıcıya dönülmüş. Ana ekran ikonundan değil, doğrudan Safari'den aç ve orada bağlan.";
+  if(m.includes("invalid_grant")||m.includes("invalid grant")) return "Kod tükenmiş. 'Spotify ile bağlan'a basıp işlemi baştan, tek seferde tamamla.";
+  if(m.includes("invalid_client")) return "Client ID yanlış ya da kaydedilmemiş. Yukarıya yapıştırıp Kaydet'e bas.";
+  if(m.includes("access_denied")) return "İzin ekranında reddedilmiş ya da hesabın uygulamaya ekli değil. Spotify panelinde User Management sekmesine kendi hesabını ekle (uygulama Development mode'da).";
+  return "";
+}
 function bagliGoster(e){$("nokta").style.background=e?"var(--yesil)":"var(--kirmizi)";
   $("durumYazi").textContent=e?"bağlı":"bağlı değil";}
 
@@ -927,14 +952,26 @@ function adresKopyala(){
   kpiTabloBas(await depoAl("kpi",[]));
   watchBas(await depoAl("watch",[]));
   yedekBas(await depoAl("yedekler",[]));
-  const kod=new URLSearchParams(location.search).get("code");
-  if(kod){
-    try{await kodDegistir(kod);toast("Spotify bağlandı ✓");}
-    catch(e){toast("Bağlantı hatası: "+e.message);}
+  const sorgu=new URLSearchParams(location.search);
+  const kod=sorgu.get("code"), spHata=sorgu.get("error");
+  if(kod||spHata){
+    try{
+      if(spHata)throw new Error(spHata);
+      const dg=await depoAl("pkce","");
+      if(!dg)throw new Error("PKCE doğrulayıcısı bulunamadı");
+      await kodDegistir(kod);
+      await depoYaz("sonGiris",{t:bugun()+" "+saat(),adres:adres(),durum:"basarili",mesaj:"Bağlandı."});
+      toast("Spotify bağlandı ✓");
+    }catch(e){
+      await depoYaz("sonGiris",{t:bugun()+" "+saat(),adres:adres(),durum:"hata",
+        mesaj:e.message, ipucu:hataIpucu(e.message)});
+      toast("Bağlantı hatası — Ayar'da ayrıntı yazıyor.");
+    }
     history.replaceState({},"",adres());
   }else{
     if(ayar.client_id)await tokenTazele();
   }
+  await girisTanıBas();
 })();
 </script>
 </body>
