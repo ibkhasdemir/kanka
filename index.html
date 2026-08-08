@@ -162,7 +162,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.0</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.3</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -267,6 +267,17 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     <button onclick="cikis()">Bağlantıyı kes</button>
   </div>
   <div class="kart">
+    <h2>Ayar Yedeği / Cihaz Taşıma</h2>
+    <p class="ipucu"><b>iOS'ta ana ekran uygulamasının deposu Safari'den ayrıdır</b> — ikondan açınca veriler boş görünür. Çözüm: Safari'de "Ayarları kopyala" de, ikondan aç, aşağıya yapıştır. Defter, KPI geçmişi <b>ve Spotify oturumu</b> taşınır, tekrar giriş yapmazsın.</p>
+    <p class="ipucu" id="cihazBilgi"></p>
+    <p class="ipucu" id="depoBilgi"></p>
+    <button onclick="ayarDisaAktar()">Ayarları kopyala</button>
+    <label>Geri yükle (kopyaladığın metni yapıştır)</label>
+    <textarea id="ayarIceri" rows="3" placeholder='{"defter":[...]}'></textarea>
+    <button class="ana" onclick="ayarIceAktar()">Bu metinden geri yükle</button>
+  </div>
+
+  <div class="kart">
     <h2>Liste Defteri</h2>
     <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b><b>yazabilir</b> tiki atılmayan listeye program hiçbir şey yazamaz. Sadece okur.</p>
     <button onclick="listeleriCek()">Listelerimi çek</button>
@@ -339,8 +350,45 @@ function sureStr(ms){const dk=Math.round(ms/60000);return Math.floor(dk/60)+" sa
 
 async function depoAl(k,varsayilan){try{const v=localStorage.getItem("kanka_"+k);
   return v?JSON.parse(v):varsayilan;}catch(e){return varsayilan;}}
-async function depoYaz(k,v){try{localStorage.setItem("kanka_"+k,JSON.stringify(v));}
-  catch(e){toast("Depo hatası: "+e.message);}}
+function depoUyar(mesaj){
+  let el=document.getElementById("depoUyari");
+  if(!el){ el=document.createElement("div"); el.id="depoUyari";
+    el.style.cssText="position:fixed;left:0;right:0;top:0;z-index:99;background:var(--kirmizi);color:#fff;"+
+      "padding:10px 14px;font-size:13px;line-height:1.4;text-align:center";
+    document.body.appendChild(el); }
+  el.innerHTML=mesaj+" <button style='width:auto;margin:6px 0 0;padding:4px 10px;font-size:12px' "+
+    "onclick=\"this.parentNode.remove()\">tamam</button>";
+}
+async function yerAc(){                       // en eski yedekleri at
+  try{
+    let y=JSON.parse(localStorage.getItem("kanka_yedekler")||"[]");
+    if(y.length<=2)return false;
+    y=y.slice(0,Math.max(2,Math.floor(y.length/2)));
+    localStorage.setItem("kanka_yedekler",JSON.stringify(y));
+    return true;
+  }catch(e){return false;}
+}
+async function depoYaz(k,v){
+  const metin=JSON.stringify(v);
+  for(let deneme=0;deneme<3;deneme++){
+    try{ localStorage.setItem("kanka_"+k,metin); return true; }
+    catch(e){
+      if(k==="yedekler"){ depoUyar("Depo doldu — yedek kaydedilemedi. Yedek sekmesinden eski yedekleri sil."); return false; }
+      if(!await yerAc()){
+        depoUyar("<b>DEPO DOLU — kayıt yapılamadı!</b><br>Yedek sekmesinden eski yedekleri sil, sonra bu işlemi tekrar yap.");
+        return false;
+      }
+    }
+  }
+  depoUyar("<b>DEPO DOLU — kayıt yapılamadı!</b><br>Yedek sekmesinden eski yedekleri sil.");
+  return false;
+}
+function depoDoluluk(){
+  let bayt=0;
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+        if(k&&k.startsWith("kanka_")) bayt+=k.length+(localStorage.getItem(k)||"").length; } }catch(e){}
+  return bayt;
+}
 
 /* ================= AUTH (PKCE) ================= */
 function adres(){return location.origin+location.pathname;}
@@ -716,12 +764,12 @@ async function yedekAl(hedefId,goster){
     const m=await listeMeta(id), p=await parcalar(id);
     let y=await depoAl("yedekler",[]);
     y.unshift({t:bugun()+" "+saat(),ad:m.ad,id:id,parcalar:p});
-    if(y.length>40)y=y.slice(0,40);
+    if(y.length>12)y=y.slice(0,12);
     await depoYaz("yedekler",y);
-    yedekBas(y);
+    yedekBas(y); depoBilgiBas();
     if(goster)toast("Yedek kasada: "+p.length+" parça");
     return p;
-  }catch(e){toast(e.message);}
+  }catch(e){ toast(e.message); if(e && /^KISIT/.test(e.message))throw e; return null; }
 }
 async function hepsiniYedekle(){
   if(!defter.length){toast("Defter boş.");return;}
@@ -793,6 +841,44 @@ async function aktar(){
   }catch(e){toast(e.message);}
 }
 
+async function ayarDisaAktar(){
+  const paket={surum:"3.2", tarih:bugun()+" "+saat(),
+    ayar:await depoAl("ayar",{}), defter:await depoAl("defter",[]),
+    kpiCok:await depoAl("kpiCok",{}), kpi:await depoAl("kpi",[]), watch:await depoAl("watch",[]),
+    auth:await depoAl("auth",null), yedekler:[]};        // oturum anahtarı dahil — giriş gerekmesin
+  const metin=JSON.stringify(paket);
+  try{ await navigator.clipboard.writeText(metin); toast("Kopyalandı (oturum anahtarı dahil) — kendi notuna yapıştır, kimseyle paylaşma."); }
+  catch(e){ $("ayarIceri").value=metin; toast("Kopyalanamadı — aşağıdaki kutudan elle kopyala."); }
+}
+async function ayarIceAktar(){
+  try{
+    const p=JSON.parse($("ayarIceri").value.trim());
+    if(!p||!p.defter)throw new Error("Bu metin ayar yedeği değil.");
+    if(!confirm("Mevcut defter ve KPI geçmişi bu yedekle değiştirilecek. Emin misin?"))return;
+    if(p.ayar)await depoYaz("ayar",p.ayar);
+    await depoYaz("defter",p.defter);
+    if(p.kpiCok)await depoYaz("kpiCok",p.kpiCok);
+    if(p.kpi)await depoYaz("kpi",p.kpi);
+    if(p.watch)await depoYaz("watch",p.watch);
+    if(p.auth&&p.auth.rt)await depoYaz("auth",p.auth);   // Spotify oturumu da taşınsın
+    toast("Geri yüklendi ("+p.defter.length+" liste)"+(p.auth&&p.auth.rt?" + oturum":"")+". Yenileniyor…");
+    setTimeout(()=>location.reload(),1200);
+  }catch(e){toast(e.message);}
+}
+function cihazBilgiBas(){
+  const el=$("cihazBilgi"); if(!el)return;
+  const ikon = (window.navigator.standalone===true) ||
+               (window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
+  el.innerHTML = ikon
+    ? "Şu an: <b style='color:var(--amber)'>ANA EKRAN UYGULAMASI</b> — kendi deposu var."
+    : "Şu an: <b style='color:var(--yesil)'>SAFARİ</b> — ana ekrana ekleyeceksen önce ayarları kopyala.";
+}
+function depoBilgiBas(){
+  const b=depoDoluluk(), mb=(b/1048576).toFixed(2), yuzde=Math.min(100,Math.round(b/5242880*100));
+  const renk = yuzde>80?"var(--kirmizi)":yuzde>60?"var(--amber)":"var(--soluk)";
+  const el=$("depoBilgi"); if(el)el.innerHTML="Depo kullanımı: <b style='color:"+renk+"'>"+mb+" MB (~%"+yuzde+")</b>"+
+    (yuzde>80?" — yedekleri azalt!":"");
+}
 /* ================= LİSTE DEFTERİ (v1.6) ================= */
 let defter=[], cekilen=[], sayilar={};
 
@@ -884,7 +970,8 @@ async function defterDokun(el){
     const d=defter.find(x=>x.id===id); if(!d)return;
     d[el.dataset.a]= (el.type==="checkbox") ? el.checked : el.value;
   }else return;
-  await depoYaz("defter",defter);
+  const yazildi=await depoYaz("defter",defter);
+  if(!yazildi){ defter=await depoAl("defter",[]); }   // kaydedilmediyse ekranı gerçeğe döndür
   defterCiz(); hedefBas();
 }
 
@@ -1084,7 +1171,7 @@ async function kapiYaz(){
   try{
     let y=await depoAl("yedekler",[]);
     y.unshift({t:bugun()+" "+saat(), ad:d.ad, id:d.id, parcalar:mevcut});
-    if(y.length>40)y=y.slice(0,40);
+    if(y.length>12)y=y.slice(0,12);
     await depoYaz("yedekler",y); yedekBas(y);
     $("kapiDurum").textContent="yedek alındı ("+mevcut.length+" parça), yazılıyor…";
     await listeyeYaz(d.id,uriler);
@@ -1102,6 +1189,7 @@ async function cumaRutini(){
     if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
     logSatir("① Yedek alınıyor...");
     const p=await yedekAl(pid(ayar.ana),false);
+    if(!p)throw new Error("Yedek alınamadı — rutin durduruldu, liste güvende.");
     logSatir("✓ "+p.length+" parça kasada");
     logSatir("② Takipçi ölçülüyor...");
     const t=await kpiOlc(true);
@@ -1136,7 +1224,7 @@ function adresKopyala(){
   defter=await depoAl("defter",[]);
   if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
     if(id)defter=[{id:id,ad:"Ana liste (ayardan)",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
-  defterCiz(); hedefBas();
+  defterCiz(); hedefBas(); depoBilgiBas(); cihazBilgiBas();
   $("kurHedef").addEventListener("change",hedefBilgi);
   $("defterSec").addEventListener("change",function(e){ defterDokun(e.target); });
   kpiTabloBas(await depoAl("kpi",[]));
