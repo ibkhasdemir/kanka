@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.7</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.8</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -352,12 +352,23 @@ async function kodDegistir(kod){
   await tokenIste(new URLSearchParams({grant_type:"authorization_code",code:kod,
     redirect_uri:adres(),client_id:ayar.client_id,code_verifier:d}));
 }
+let tazelemeSozu=null;
 async function tokenTazele(){
-  const a=await depoAl("auth",null);
-  if(!a||!a.rt)return false;
-  try{await tokenIste(new URLSearchParams({grant_type:"refresh_token",
-    refresh_token:a.rt,client_id:ayar.client_id}));return true;}
-  catch(e){bagliGoster(false);return false;}
+  if(tazelemeSozu)return tazelemeSozu;          // tek yenileme, hepsi onu bekler
+  tazelemeSozu=(async function(){
+    const a=await depoAl("auth",null);
+    if(!a||!a.rt)return false;
+    try{
+      await tokenIste(new URLSearchParams({grant_type:"refresh_token",
+        refresh_token:a.rt,client_id:ayar.client_id}));
+      return true;
+    }catch(e){
+      bagliGoster(false);
+      toast("Oturum düştü — Ayar'dan tekrar bağlan.");
+      return false;
+    }
+  })();
+  try{ return await tazelemeSozu; } finally{ tazelemeSozu=null; }
 }
 async function hazir(){
   if(token&&Date.now()<tokenSon)return true;
