@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.2</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.4</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -205,7 +205,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     <h2>🪄 Metinden Liste Kur</h2>
     <p class="ipucu">Claude'un yazdığı listeyi buraya yapıştır — şarkıları Spotify'da kendim bulur, sırasıyla listeye yazarım. Amele modu kapandı.</p>
     <textarea id="metinListe" placeholder="1. Şarkı — Sanatçı&#10;2. Şarkı — Sanatçı&#10;..."></textarea>
-    <label>Hedef liste</label>
+    <label>Hedef liste (üzerine yazılacak)</label>
     <select id="kurHedef"></select>
     <p class="ipucu" id="kurHedefBilgi"></p>
     <button class="amber" onclick="metindenBul()">① Şarkıları bul</button>
@@ -223,9 +223,11 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 <section id="s-yedek" class="sekme">
   <div class="kart">
     <h2>Yedek</h2>
-    <label>Liste (boş = ana liste)</label>
-    <input type="text" id="yedekLink" placeholder="ana liste">
-    <button class="ana" onclick="yedekAl(null,true)">Şimdi yedek al</button>
+    <label>Liste</label>
+    <select id="yedekLink"></select>
+    <button class="ana" onclick="yedekAl(null,true)">Seçili listeyi yedekle</button>
+    <button onclick="hepsiniYedekle()">Defterdeki TÜM listeleri yedekle</button>
+    <p class="ipucu" id="yedekDurum"></p>
   </div>
   <div class="kart"><h2>Kasadakiler</h2><div id="yedekListe" class="bosluk">Henüz yedek yok.</div></div>
 </section>
@@ -581,17 +583,31 @@ async function raporUret(hedefId,kutu){
 /* ================= YEDEK ================= */
 async function yedekAl(hedefId,goster){
   try{
-    const id=hedefId||pid($("yedekLink").value)||pid(ayar.ana);
-    if(!id)throw new Error("Liste linki yok.");
+    const secili=$("yedekLink")?$("yedekLink").value:"";
+    const id=hedefId||secili||pid(ayar.ana);
+    if(!id)throw new Error("Yedeklenecek liste seçili değil — Ayar > Liste Defteri'nden liste ekle.");
     const m=await listeMeta(id), p=await parcalar(id);
     let y=await depoAl("yedekler",[]);
     y.unshift({t:bugun()+" "+saat(),ad:m.ad,id:id,parcalar:p});
-    if(y.length>8)y=y.slice(0,8);
+    if(y.length>40)y=y.slice(0,40);
     await depoYaz("yedekler",y);
     yedekBas(y);
     if(goster)toast("Yedek kasada: "+p.length+" parça");
     return p;
   }catch(e){toast(e.message);}
+}
+async function hepsiniYedekle(){
+  if(!defter.length){toast("Defter boş.");return;}
+  let ok=0, hata=0;
+  for(let i=0;i<defter.length;i++){
+    const d=defter[i];
+    $("yedekDurum").textContent="Yedekleniyor "+(i+1)+"/"+defter.length+" — "+d.ad;
+    try{ const p=await yedekAl(d.id,false); if(p)ok++; else hata++; }
+    catch(e){ hata++; }
+    await new Promise(r=>setTimeout(r,250));
+  }
+  $("yedekDurum").textContent="Bitti: "+ok+" liste kasada"+(hata?", "+hata+" hata":"");
+  toast(ok+" listenin yedeği alındı.");
 }
 function yedekBas(y){
   if(!y.length){$("yedekListe").innerHTML="Henüz yedek yok.";return;}
@@ -603,10 +619,10 @@ function yedekBas(y){
 }
 async function yedekIndir(i){
   const y=await depoAl("yedekler",[]);const x=y[i];if(!x)return;
-  const metin="# "+x.ad+" — "+x.t+"\n"+
-    x.parcalar.map((p,n)=>(n+1)+". "+p.sanatci+" — "+p.sarki).join("\n");
+  const metin="\uFEFF# "+x.ad+" — "+x.t+" ("+x.parcalar.length+" şarkı)\n"+
+    x.parcalar.map((p,n)=>(n+1)+". "+p.sarki+" — "+p.sanatci).join("\n")+"\n";
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([metin],{type:"text/plain"}));
+  a.href=URL.createObjectURL(new Blob([metin],{type:"text/plain;charset=utf-8"}));
   a.download="yedek_"+x.t.replace(/[: ]/g,"-")+".txt";a.click();
 }
 async function yedekSil(i){
@@ -689,7 +705,14 @@ async function listeleriCek(){
     while(url){const j=await api(url); hepsi=hepsi.concat(j.items||[]); url=j.next; if(hepsi.length>300)break;}
     cekilen=hepsi.filter(p=>p&&p.owner&&p.owner.id===ben.id);
     cekilen.forEach(p=>{const n=listeSayi(p); if(n!==null)sayilar[p.id]=n;});
-    defterCiz();
+    // defterdeki adları Spotify'daki gerçek adlarla tazele (eski/uydurma adlar düzelsin)
+    let adDegisti=false;
+    defter.forEach(function(d){
+      const p=cekilen.find(x=>x.id===d.id);
+      if(p&&p.name&&d.ad!==p.name){ d.ad=p.name; adDegisti=true; }
+    });
+    if(adDegisti){ await depoYaz("defter",defter); toast("Liste adları güncellendi."); }
+    defterCiz(); hedefBas();
     sayilariDoldur();
   }catch(e){toast(e.message);}
 }
@@ -752,6 +775,7 @@ function hedefBas(){
   secDoldur("kurHedef",true);
   secDoldur("kaynakLink",false);
   secDoldur("hedefLink",true);
+  secDoldur("yedekLink",false);
   hedefBilgi();
 }
 function hedefKayit(){ return defter.find(d=>d.id===$("kurHedef").value)||null; }
@@ -918,7 +942,7 @@ async function kapiYaz(){
   try{
     let y=await depoAl("yedekler",[]);
     y.unshift({t:bugun()+" "+saat(), ad:d.ad, id:d.id, parcalar:mevcut});
-    if(y.length>8)y=y.slice(0,8);
+    if(y.length>40)y=y.slice(0,40);
     await depoYaz("yedekler",y); yedekBas(y);
     $("kapiDurum").textContent="yedek alındı ("+mevcut.length+" parça), yazılıyor…";
     await listeyeYaz(d.id,uriler);
