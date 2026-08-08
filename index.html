@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v1.9</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.0</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -333,8 +333,8 @@ async function girisYap(){
   const dogrulayici=rastgele(48);
   await depoYaz("pkce",dogrulayici);
   const ozet=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(dogrulayici));
-  await depoYaz("sonGiris",{t:bugun()+" "+saat(), adres:adres(), durum:"bekliyor",
-    mesaj:"İzin ekranına gidildi, dönüş bekleniyor."});
+  depoYaz("sonGiris",{t:bugun()+" "+saat(), adres:adres(), durum:"bekliyor",
+    mesaj:"İzin ekranına gidildi, dönüş bekleniyor."});   // beklenmiyor: dokunma anı korunsun
   location.href="https://accounts.spotify.com/authorize?client_id="+ayar.client_id+
     "&response_type=code&redirect_uri="+encodeURIComponent(adres())+
     "&scope="+encodeURIComponent("playlist-read-private playlist-modify-public playlist-modify-private")+
