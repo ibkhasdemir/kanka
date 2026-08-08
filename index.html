@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.5</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.7</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -414,9 +414,10 @@ async function api(yol,secenek){
   if(r.status===429){
     const bekle=parseInt(r.headers.get("Retry-After")||"3",10);
     const d=(secenek&&secenek.__deneme)||0;
-    if(d>=4||bekle>90)throw new Error("Spotify hız sınırı doldu ("+bekle+" sn). Biraz bekleyip tekrar dene.");
-    if(window.hizGoster)window.hizGoster(bekle);
-    await new Promise(x=>setTimeout(x,(bekle+1)*1000));
+    if(d>=6||bekle>120)throw new Error("KISIT: Spotify hâlâ kısıtlıyor. Biraz bekleyip tekrar '① Şarkıları bul' de — kaldığı yerden devam eder.");
+    const sn=Math.max(bekle, Math.pow(2,d)*2);   // 2,4,8,16,32,64 sn
+    if(window.hizGoster)window.hizGoster(sn,d+1);
+    await new Promise(x=>setTimeout(x,sn*1000));
     return api(yol,Object.assign({},secenek||{},{__deneme:d+1}));
   }
   if(r.status===204)return {};
@@ -469,12 +470,22 @@ async function parcalar(id){
   }
   return dizi;
 }
+let YAZMA_UC=null;
+async function yazUc(sp_id,yontem,uriler){
+  const uclar = YAZMA_UC ? [YAZMA_UC] : ["items","tracks"];
+  let sonHata=null;
+  for(const uc of uclar){
+    try{
+      await api("/playlists/"+sp_id+"/"+uc,{method:yontem,body:JSON.stringify({uris:uriler})});
+      YAZMA_UC=uc; return;
+    }catch(e){ sonHata=e; if(e.status&&e.status!==404&&e.status!==400)throw e; }
+  }
+  throw sonHata||new Error("Yazma ucu bulunamadı.");
+}
 async function listeyeYaz(sp_id,uriler){
-  await api("/playlists/"+sp_id+"/items",{method:"PUT",
-    body:JSON.stringify({uris:uriler.slice(0,100)})});
+  await yazUc(sp_id,"PUT",uriler.slice(0,100));
   for(let i=100;i<uriler.length;i+=100)
-    await api("/playlists/"+sp_id+"/items",{method:"POST",
-      body:JSON.stringify({uris:uriler.slice(i,i+100)})});
+    await yazUc(sp_id,"POST",uriler.slice(i,i+100));
 }
 
 /* ================= KPI ================= */
@@ -850,38 +861,42 @@ async function metindenBul(){
     if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
     const adaylar=satirAyikla($("metinListe").value||"");
     if(!adaylar.length){toast("Liste metni boş görünüyor.");return;}
-    kurSonuc=adaylar.map(a=>Object.assign({},a,{adaylar:[],uri:null,bulunan:"",durum:"bekle",kullan:true}));
+    const ayni = kurSonuc.length===adaylar.length &&
+                 kurSonuc.every((x,k)=>x.sarki===adaylar[k].sarki);
+    if(ayni && kurSonuc.some(x=>x.durum==="bekle")){
+      toast("Kaldığı yerden devam ediyor.");         // önceki sonuçlar korunur
+    }else{
+      kurSonuc=adaylar.map(a=>Object.assign({},a,{adaylar:[],uri:null,bulunan:"",durum:"bekle",kullan:true}));
+    }
     $("kurSuzgec").style.display="none";
     const n=kurSonuc.length;
     let durdu=null;
-    window.hizGoster=function(sn){
+    window.hizGoster=function(sn,kacinci){
       $("kurOnizleme").innerHTML="<p class='ipucu' style='color:var(--amber)'>Spotify hız sınırı — "+sn+
-        " sn bekleniyor, sonra devam edecek. Sayfayı kapatma.</p>";
+        " sn bekleniyor ("+kacinci+"/6), sonra devam edecek. Sayfayı kapatma.</p>";
     };
     for(let i=0;i<n;i++){
       const r=kurSonuc[i];
+      if(r.durum!=="bekle")continue;                 // daha önce tarandı
       try{
-        let c=await kurAra('track:"'+r.sarki+'"'+(r.sanatci?' artist:"'+r.sanatci+'"':""));
-        if(!c.length){ await new Promise(x=>setTimeout(x,300));
-                       c=await kurAra((r.sarki+" "+r.sanatci).trim()); }
-        r.adaylar=c;
+        r.adaylar=await kurAra((r.sarki+" "+r.sanatci).trim());   // satır başına TEK istek
         const g=kurPuan(r); r.durum=g.d; r.uri=g.s?g.s.uri:null;
         r.bulunan=g.s?(g.s.sarki+" · "+g.s.sanatci):"";
       }catch(e){
-        if(/hız sınırı/.test(e.message)){ durdu=e.message; break; }
+        if(/^KISIT/.test(e.message)){ durdu=e.message.replace(/^KISIT: /,""); break; }
         r.durum="yok"; r.hata=e.message;
       }
       r.kullan=(r.durum!=="yok");
       $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+(i+1)+"/"+n+" — "+kacir(r.sarki.slice(0,32))+"</p>";
-      await new Promise(x=>setTimeout(x,300));
+      await new Promise(x=>setTimeout(x,120));
     }
     window.hizGoster=null;
-    kurSonuc=kurSonuc.filter(x=>x.durum!=="bekle");
     $("kurSuzgec").style.display="flex";
     kurCiz();
     if(durdu){
+      const tarandi=kurSonuc.filter(x=>x.durum!=="bekle").length;
       $("kurOnizleme").innerHTML="<p class='ipucu' style='color:var(--kirmizi)'>"+kacir(durdu)+
-        "<br>İlk "+kurSonuc.length+" satır tarandı. Birkaç dakika sonra tekrar '① Şarkıları bul' de.</p>"+
+        "<br><b>"+tarandi+"/"+n+" tarandı, "+(n-tarandi)+" kaldı.</b> Metni silme — tekrar bastığında kaldığı yerden devam eder.</p>"+
         $("kurOnizleme").innerHTML;
     }
   }catch(e){ window.hizGoster=null; toast(e.message); }
@@ -893,11 +908,12 @@ function kurSuz(f,btn){
   kurCiz();
 }
 function kurCiz(){
-  const say={kesin:0,supheli:0,yok:0};
+  const say={kesin:0,supheli:0,yok:0,bekle:0};
   kurSonuc.forEach(r=>{if(say[r.durum]!==undefined)say[r.durum]++;});
   let h="<p><b class='arti'>✓ "+say.kesin+" kesin</b>"+
         (say.supheli?"  <b style='color:var(--amber)'>⚠ "+say.supheli+" şüpheli</b>":"")+
-        (say.yok?"  <b class='eksi'>✗ "+say.yok+" bulunamadı</b>":"")+"</p>";
+        (say.yok?"  <b class='eksi'>✗ "+say.yok+" bulunamadı</b>":"")+
+        (say.bekle?"  <b class='ipucu'>⏳ "+say.bekle+" sırada</b>":"")+"</p>";
   const gor=kurSonuc.map((r,i)=>({r:r,i:i})).filter(x=>kurFiltre==="hepsi"||x.r.durum===kurFiltre);
   h+= gor.length? gor.map(function(x){
     const r=x.r, i=x.i;
@@ -912,7 +928,7 @@ function kurCiz(){
         (r.adaylar.length>1?"<div class='secenek' id='sec"+i+"'>"+r.adaylar.map((c,k)=>
           "<button onclick='kurSec("+i+","+k+")'>"+kacir(c.sarki)+" · <span class='ipucu'>"+kacir(c.sanatci)+"</span></button>").join("")+"</div>":"")+
       "</div><div class='dug'>"+rz+
-        "<button onclick='kurAlma("+i+")'>"+(r.kullan?"çıkar":"ekle")+"</button>"+
+        (r.uri?"<button onclick='kurAlma("+i+")'>"+(r.kullan?"çıkar":"ekle")+"</button>":"")+
         (r.adaylar.length>1?"<button onclick='kurAc("+i+")'>seç</button>":"")+
       "</div></div>";
   }).join("") : "<p class='ipucu'>Bu süzgeçte satır yok.</p>";
@@ -924,7 +940,6 @@ function kurAc(i){const e=$("sec"+i); if(e)e.classList.toggle("acik");}
 function kurAlma(i){const r=kurSonuc[i]; r.kullan=(!r.kullan&&!!r.uri); kurCiz();}
 function kurSec(i,k){const r=kurSonuc[i], c=r.adaylar[k]; if(!c)return;
   r.uri=c.uri; r.bulunan=c.sarki+" · "+c.sanatci; r.durum="kesin"; r.kullan=true; kurCiz();}
-function kurSil(i){kurSonuc.splice(i,1);kurCiz();}
 
 /* ================= ÜZERİNE YAZMA KAPISI ================= */
 let KAPI=null;
