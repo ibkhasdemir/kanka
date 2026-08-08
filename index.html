@@ -247,7 +247,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     <p class="ipucu">Programın tanıyacağı listeler. Bir kere seçersin. <b>Yazma kilidi</b> kapalıyken o listeye hiçbir şey yazılamaz.</p>
     <button onclick="listeleriCek()">Listelerimi çek</button>
     <div id="defterSec"></div>
-    <button class="ana" id="defterKaydet" style="display:none" onclick="defterKaydet()">Seçimi kaydet</button>
+    <button class="ana" id="defterBtnKaydet" style="display:none">Seçimi kaydet</button>
     <div id="defterAyar"></div>
   </div>
   <div class="kart">
@@ -624,10 +624,10 @@ async function listeleriCek(){
     cekilen=hepsi.filter(p=>p&&p.owner&&p.owner.id===ben.id);
     $("defterSec").innerHTML=cekilen.length? cekilen.map(p=>{
       const v=defter.some(d=>d.id===p.id);
-      return "<div class='secsat'><input type='checkbox' data-id='"+p.id+"' "+(v?"checked":"")+
+      return "<div class='secsat'><input type='checkbox' data-id='"+p.id+"' data-ad=\""+kacir(p.name)+"\" "+(v?"checked":"")+
         "><div><b>"+kacir(p.name)+"</b><br><span class='ipucu sayi' data-id='"+p.id+"' data-bek='"+(listeSayi(p)===null?"1":"0")+"'>"+(listeSayi(p)===null?"sayılıyor…":listeSayi(p)+" şarkı")+"</span></div></div>";
     }).join("") : "<p class='ipucu'>Kendi listen bulunamadı.</p>";
-    $("defterKaydet").style.display="block";
+    $("defterBtnKaydet").style.display="block";
     sayilariDoldur();
   }catch(e){toast(e.message);}
 }
@@ -661,23 +661,27 @@ async function sayilariDoldur(){
 }
 function kacir(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 async function defterKaydet(){
-  const idler=Array.from(document.querySelectorAll("#defterSec input:checked")).map(i=>i.dataset.id);
-  defter=idler.map(id=>{
-    const eski=defter.find(d=>d.id===id), p=cekilen.find(x=>x.id===id);
-    return eski||{id:id, ad:(p&&p.name)||id, rol:"AKIŞ", ritim:"haftalık", yazma:false};
+  const kutular=Array.from(document.querySelectorAll("#defterSec input[type=checkbox]:checked"));
+  if(!kutular.length){toast("Hiç liste işaretlemedin.");return;}
+  defter=kutular.map(function(k){
+    const id=k.dataset.id;
+    const eski=defter.find(d=>d.id===id);
+    const p=cekilen.find(x=>x.id===id);
+    return eski||{id:id, ad:k.dataset.ad||(p&&p.name)||id, rol:"AKIŞ", ritim:"haftalık", yazma:false};
   });
   await depoYaz("defter",defter);
-  defterBas(); hedefBas(); toast(defter.length+" liste deftere yazıldı.");
+  defterBas(); hedefBas(); toast(defter.length+" liste deftere yazıldı — her birinin ayarı ayrı.");
+  $("defterAyar").scrollIntoView({behavior:"smooth",block:"center"});
 }
 function defterBas(){
   $("defterAyar").innerHTML=defter.length? defter.map((d,i)=>
     "<div class='dsat'><div class='ad'>"+kacir(d.ad)+"</div>"+
-    "<select data-i='"+i+"' data-a='rol' onchange='defterDegis(this)'>"+
+    "<select data-i='"+i+"' data-a='rol'>"+
       ["AKIŞ","STOK"].map(x=>"<option "+(d.rol===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
-    "<select data-i='"+i+"' data-a='ritim' onchange='defterDegis(this)'>"+
+    "<select data-i='"+i+"' data-a='ritim'>"+
       ["haftalık","aylık","3 aylık"].map(x=>"<option "+(d.ritim===x?"selected":"")+">"+x+"</option>").join("")+"</select>"+
     "<label class='kilit'><input type='checkbox' data-i='"+i+"' data-a='yazma' "+(d.yazma?"checked":"")+
-      " onchange='defterDegis(this)'>yazma</label></div>").join("")
+      ">yazma</label></div>").join("")
     : "<p class='ipucu'>Defter boş.</p>";
 }
 async function defterDegis(el){
@@ -914,9 +918,13 @@ function adresKopyala(){
   $("benimAdres").value=adres();
   defter=await depoAl("defter",[]);
   if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
-    if(id)defter=[{id:id,ad:"Ana liste",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
+    if(id)defter=[{id:id,ad:"Ana liste (ayardan)",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
   defterBas(); hedefBas();
   $("kurHedef").addEventListener("change",hedefBilgi);
+  $("defterBtnKaydet").addEventListener("click",defterKaydet);
+  $("defterAyar").addEventListener("change",function(e){
+    const el=e.target; if(el.dataset && el.dataset.i!==undefined) defterDegis(el);
+  });
   kpiTabloBas(await depoAl("kpi",[]));
   watchBas(await depoAl("watch",[]));
   yedekBas(await depoAl("yedekler",[]));
