@@ -145,7 +145,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.0</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v2.1</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -395,7 +395,7 @@ function hataIpucu(m){
   m=String(m||"").toLowerCase();
   if(m.includes("redirect")) return "Gönderilen adres Spotify'daki Redirect URI listesiyle harfi harfine aynı değil. Yukarıdaki adresi kopyalayıp panoya ekle.";
   if(m.includes("doğrulayıcı")) return "İzin ekranından başka bir tarayıcıya dönülmüş. Ana ekran ikonundan değil, doğrudan Safari'den aç ve orada bağlan.";
-  if(m.includes("invalid_grant")||m.includes("invalid grant")) return "Kod tükenmiş. 'Spotify ile bağlan'a basıp işlemi baştan, tek seferde tamamla.";
+  if(m.includes("invalid_grant")||m.includes("invalid grant")||m.includes("authorization code")) return "Kod tükenmiş. 'Spotify ile bağlan'a basıp işlemi baştan, tek seferde tamamla.";
   if(m.includes("invalid_client")) return "Client ID yanlış ya da kaydedilmemiş. Yukarıya yapıştırıp Kaydet'e bas.";
   if(m.includes("access_denied")) return "İzin ekranında reddedilmiş ya da hesabın uygulamaya ekli değil. Spotify panelinde User Management sekmesine kendi hesabını ekle (uygulama Development mode'da).";
   return "";
@@ -736,6 +736,30 @@ async function defterDokun(el){
   }else return;
   await depoYaz("defter",defter);
   defterCiz(); hedefBas();
+}
+
+
+/* --- hedef menüleri (defter bölümü yazılırken kaybolmuştu) --- */
+function secDoldur(id,kilitGoster){
+  const el=$(id); if(!el)return;
+  const tut=el.value;
+  el.innerHTML= defter.length
+    ? defter.map(d=>"<option value='"+d.id+"'>"+kacir(d.ad)+((kilitGoster&&!d.yazma)?" (kilitli)":"")+"</option>").join("")
+    : "<option value=''>— defter boş, Ayar > Liste Defteri —</option>";
+  if(defter.some(d=>d.id===tut))el.value=tut;
+}
+function hedefBas(){
+  secDoldur("kurHedef",true);
+  secDoldur("kaynakLink",false);
+  secDoldur("hedefLink",true);
+  hedefBilgi();
+}
+function hedefKayit(){ return defter.find(d=>d.id===$("kurHedef").value)||null; }
+function hedefBilgi(){
+  const d=hedefKayit(), el=$("kurHedefBilgi"); if(!el)return;
+  el.innerHTML = d
+    ? (kacir(d.rol)+" · "+kacir(d.ritim)+" · yazma "+(d.yazma?"<b style='color:var(--yesil)'>açık</b>":"<b style='color:var(--kirmizi)'>kilitli</b> — Ayar > Liste Defteri"))
+    : "Ayar sekmesinden liste defterini kur.";
 }
 
 /* ================= METİNDEN LİSTE KUR (v1.6) ================= */
