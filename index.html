@@ -162,7 +162,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.4</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.5</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -493,19 +493,43 @@ function bagliGoster(e){$("nokta").style.background=e?"var(--yesil)":"var(--kirm
   $("durumYazi").textContent=e?"bağlı":"bağlı değil";}
 
 /* ================= SPOTIFY API ================= */
+function sureYazi(sn){
+  if(sn<60)return sn+" saniye";
+  if(sn<3600)return Math.ceil(sn/60)+" dakika";
+  return (sn/3600).toFixed(1)+" saat";
+}
+function kilitKoy(sn){
+  try{ localStorage.setItem("kanka_kilit", String(Date.now()+sn*1000)); }catch(e){}
+  kilitBas();
+}
+function kilitKalan(){
+  try{ const t=parseInt(localStorage.getItem("kanka_kilit")||"0",10);
+       const k=Math.ceil((t-Date.now())/1000); return k>0?k:0; }catch(e){return 0;}
+}
+function kilitBas(){
+  const k=kilitKalan(); const el=document.getElementById("kilitBant");
+  if(k<=0){ if(el)el.remove(); return; }
+  let b=el;
+  if(!b){ b=document.createElement("div"); b.id="kilitBant";
+    b.style.cssText="position:fixed;left:0;right:0;top:0;z-index:98;background:var(--kirmizi);color:#fff;"+
+      "padding:9px 14px;font-size:13px;text-align:center";
+    document.body.appendChild(b); }
+  b.textContent="Spotify kısıtlaması — kalan süre "+sureYazi(k)+". Bu süre boyunca istek atılmıyor (ceza uzamasın).";
+}
+setInterval(kilitBas,1000);
+
 async function api(yol,secenek){
+  const kalan=kilitKalan();
+  if(kalan>0)throw new Error("KISIT: Spotify kısıtlaması sürüyor — kalan "+sureYazi(kalan)+". Bitmeden istek atılmıyor.");
   if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
   const r=await fetch(yol.startsWith("http")?yol:"https://api.spotify.com/v1"+yol,
     Object.assign({headers:{Authorization:"Bearer "+token,
       "Content-Type":"application/json"}},secenek||{}));
   if(r.status===429){
-    const bekle=parseInt(r.headers.get("Retry-After")||"3",10);
-    const d=(secenek&&secenek.__deneme)||0;
-    if(d>=6||bekle>120)throw new Error("KISIT: Spotify hâlâ kısıtlıyor. Biraz bekleyip tekrar '① Şarkıları bul' de — kaldığı yerden devam eder.");
-    const sn=Math.max(bekle, Math.pow(2,d)*2);   // 2,4,8,16,32,64 sn
-    if(window.hizGoster)window.hizGoster(sn,d+1);
-    await new Promise(x=>setTimeout(x,sn*1000));
-    return api(yol,Object.assign({},secenek||{},{__deneme:d+1}));
+    const bekle=parseInt(r.headers.get("Retry-After")||"60",10);
+    kilitKoy(bekle);
+    throw new Error("KISIT: Spotify kısıtladı. Kalan süre: "+sureYazi(bekle)+
+      ". Bu süre dolmadan istek atmak cezayı UZATIYOR — program şimdi duracak.");
   }
   if(r.status===204)return {};
   const j=await r.json().catch(()=>({}));
