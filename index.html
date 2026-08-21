@@ -158,11 +158,55 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
 #kapi ul{margin:0 0 14px;padding-left:18px;font-size:13px;color:var(--soluk)}
 #kapi ul li{margin-bottom:5px}
 #kapi ul li b{color:var(--murekkep)}
+/* ============ v3.6 — Bozuk Saat kataloğu ============ */
+input[type=date],input[type=number]{width:100%;background:#0F0B18;color:var(--murekkep);
+  border:1px solid var(--cizgi);border-radius:10px;padding:12px;font-size:15px;
+  font-family:inherit;-webkit-appearance:none;appearance:none}
+.sayacKutu{text-align:center;padding:4px 0 2px}
+.sayacGun{font-family:'Anton',Impact,sans-serif;font-size:66px;line-height:.95;color:var(--vurgu)}
+.sayacGun.kucukSayac{font-size:38px;letter-spacing:1px}
+.sayacAlt{color:var(--soluk);font-size:13px;margin-top:6px}
+.serit36{margin-top:12px;border:1px solid var(--cizgi);background:#0F0B18;
+  border-radius:10px;padding:10px 12px;font-size:13px;color:var(--soluk);text-align:left}
+.serit36.yakin{border-color:#ffc94d55;color:var(--amber)}
+.serit36.gecti{border-color:#ff5c5c66;color:var(--kirmizi)}
+.ksat{border-bottom:1px solid var(--cizgi);padding:10px 0}
+.ksat:last-child{border-bottom:0}
+.ksat .ust{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ksat .tar{margin-left:auto;color:var(--soluk);font-size:12px}
+.adim{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;
+  border-bottom:1px dashed var(--cizgi)}
+.adim:last-child{border-bottom:0}
+.adim input[type=checkbox]{width:21px;height:21px;margin:0;accent-color:var(--vurgu);flex:none}
+.adim.bitti{color:var(--soluk);text-decoration:line-through}
+.ikili{display:flex;gap:8px}
+.ikili>div{flex:1;min-width:0}
+nav button{font-size:11px}
+/* ============ v3.7 — Fark / Vitrin / Radar ============ */
+.farkOzet{display:flex;gap:8px;margin:10px 0}
+.farkOzet div{flex:1;background:#0F0B18;border:1px solid var(--cizgi);border-radius:10px;
+  padding:9px 6px;text-align:center}
+.farkOzet b{display:block;font-family:'Anton',Impact,sans-serif;font-size:22px;line-height:1.1}
+.farkOzet small{color:var(--soluk);font-size:11px}
+.farkOzet .art b{color:var(--yesil)} .farkOzet .eks b{color:var(--kirmizi)}
+.farkOzet .ayn b{color:var(--soluk)}
+.farkDok{max-height:190px;overflow:auto;border:1px solid var(--cizgi);border-radius:10px;
+  padding:8px 10px;font-size:13px;background:#0F0B18;margin-bottom:10px}
+.farkDok div{padding:3px 0}
+.farkDok .a::before{content:"+ ";color:var(--yesil)}
+.farkDok .s::before{content:"− ";color:var(--kirmizi)}
+.vsat{display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--cizgi);padding:8px 0}
+.vsat .no{width:22px;color:var(--soluk);font-size:12px;flex:none;text-align:right}
+.vsat .bil{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsat button{width:auto;margin:0;padding:6px 10px;font-size:12px;flex:none}
+.gunlukSat{border-bottom:1px solid var(--cizgi);padding:8px 0;font-size:13px}
+.gunlukSat .et{color:var(--soluk);font-size:11.5px}
+.onIzle{width:100%;border-radius:12px;border:1px solid var(--cizgi);margin-top:8px;display:block}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.5</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.7</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -233,6 +277,7 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
       <button onclick="kurSuz('supheli',this)">Şüpheli</button>
       <button onclick="kurSuz('yok',this)">Bulunamadı</button>
     </div>
+    <button onclick="yokTekrar()">Bulunamayanları yeniden tara</button>
     <div id="kurOnizleme"></div>
     <button class="ana" onclick="metindenYaz()">② Listeye yaz</button>
   </div>
@@ -300,6 +345,144 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
     Not: PC'deki KANKA ile aynı Spotify uygulaması kullanılabilir; Redirect URI'ler yan yana durur.</p>
   </div>
 </section>
+
+<!-- ================= SAAT (v3.6) ================= -->
+<section id="s-saat" class="sekme">
+  <div class="kart">
+    <h2>Bozuk Saat</h2>
+    <div id="saatSayac"><div class="bosluk">yükleniyor…</div></div>
+  </div>
+
+  <div class="kart" id="cikisKart" style="display:none">
+    <h2>Çıkış günü paneli</h2>
+    <p class="ipucu" id="cikisBaslik"></p>
+    <div id="cikisAdim"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Katalog</h2>
+    <div id="katListe"></div>
+    <label>Şarkı adı</label>
+    <input type="text" id="ySarkiAd" placeholder="Kapı">
+    <div class="ikili">
+      <div><label>Çıkış tarihi</label><input type="date" id="ySarkiTarih"></div>
+      <div><label>Durum</label>
+        <select id="ySarkiDurum">
+          <option value="planli">planlı</option>
+          <option value="yayinda">yayında</option>
+          <option value="taslak">taslak</option>
+        </select></div>
+    </div>
+    <button onclick="sarkiEkle()">Şarkıyı ekle</button>
+  </div>
+
+  <div class="kart">
+    <h2>Şarkı günlüğü</h2>
+    <p class="ipucu">S4A'nın API'si yok — sayıları elle gir. Günde bir satır; aynı güne ikinci giriş üstüne yazar.</p>
+    <label>Şarkı</label>
+    <select id="gunlukSarki" onchange="gunlukCiz()"></select>
+    <label>Tarih</label>
+    <input type="date" id="gunlukTarih">
+    <div class="ikili">
+      <div><label>Dinlenme</label><input type="number" id="gunlukD" inputmode="numeric" placeholder="0"></div>
+      <div><label>Dinleyici</label><input type="number" id="gunlukL" inputmode="numeric" placeholder="0"></div>
+      <div><label>Kaydetme</label><input type="number" id="gunlukK" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <label>Not (isteğe bağlı)</label>
+    <input type="text" id="gunlukNot" placeholder="Reels çıktı">
+    <button class="ana" onclick="gunlukEkle()">Günlüğe yaz</button>
+    <div id="gunlukGovde"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Discovered On — çapraz sinyal</h2>
+    <p class="ipucu">Kaynak listenin adı defterindeki bir listeye uyuyorsa <b>kendi listen</b>, uymuyorsa <b>dış kaynak</b> sayılır.</p>
+    <label>Şarkı</label>
+    <select id="kesifSarki" onchange="kesifCiz()"></select>
+    <div class="ikili">
+      <div><label>Kaynak liste</label><input type="text" id="kesifAd" placeholder="Türkçe Pop 2026"></div>
+      <div><label>Dinlenme</label><input type="number" id="kesifV" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <button onclick="kesifEkle()">Kaynağı kaydet</button>
+    <div id="kesifGovde"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Claude'a yapıştır</h2>
+    <p class="ipucu">Kataloğun tamamını düz metne çevirir — sohbete dosya değil, metin gider.</p>
+    <button class="amber" onclick="katalogKopyala()">Özeti kopyala</button>
+    <textarea id="katalogMetinKutu" placeholder="kopyalanamazsa metin buraya düşer"></textarea>
+  </div>
+</section>
+
+<!-- ================= VİTRİN (v3.7) ================= -->
+<section id="s-vitrin" class="sekme">
+  <div class="kart">
+    <h2>İlk 5 rotasyonu</h2>
+    <p class="ipucu">Açılış şarkısı, listenin atlanma oranını belirleyen tek satır. Buradaki taşıma <b>hiçbir şey silmez</b> — sadece sırayı değiştirir.</p>
+    <label>Liste</label>
+    <select id="vitrinListe"></select>
+    <button onclick="acilisOku()">İlk 10'u getir</button>
+    <div id="acilisGovde"></div>
+  </div>
+
+  <div class="kart">
+    <h2>İsim ve açıklama</h2>
+    <p class="ipucu">Aramada bulunmanı sağlayan tek şey bu iki alan. Anahtar kelimeleri açıklamaya doğal cümleyle serpiştir.</p>
+    <button onclick="vitrinOku()">Şu ankini getir</button>
+    <label>İsim</label>
+    <input type="text" id="vitrinAd" placeholder="liste adı">
+    <label>Açıklama</label>
+    <textarea id="vitrinAciklama" style="min-height:90px" placeholder="türkçe pop 2026, yeni çıkanlar, haftalık güncellenir…"></textarea>
+    <p class="ipucu" id="vitrinSayac"></p>
+    <button class="ana" onclick="vitrinYaz()">Spotify'a bas</button>
+  </div>
+
+  <div class="kart">
+    <h2>Kapak</h2>
+    <p class="ipucu">Arama sonucunda tıklanmayı belirleyen kare. Fotoğraf seç — 640×640 JPEG'e küçültülüp yüklenir.</p>
+    <input type="file" id="kapakDosya" accept="image/*" onchange="kapakSec(this)">
+    <img id="kapakOnIzle" class="onIzle" style="display:none" alt="">
+    <p class="ipucu" id="kapakBilgi"></p>
+    <button class="amber" id="kapakBas" onclick="kapakYukle()" disabled>Kapağı yükle</button>
+  </div>
+
+  <div class="kart">
+    <h2>Vitrin günlüğü</h2>
+    <p class="ipucu">Her değişiklik tarihiyle işlenir; KPI'daki takipçi eğrisini bu çakılara göre okursun.</p>
+    <div id="vitrinGunluk"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Radar — rakip açılışları</h2>
+    <p class="ipucu">Sadece okuma ve analiz. Buradaki hiçbir şey senin listelerine yazılmaz, karışmaz.</p>
+    <label>Liste adı</label>
+    <input type="text" id="radarAd" placeholder="Türkçe Pop — rakip">
+    <label>Link (varsa)</label>
+    <input type="text" id="radarLink" placeholder="https://open.spotify.com/playlist/...">
+    <button onclick="radarEkle()">Radara ekle</button>
+    <div id="radarListe"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Radar — elle giriş</h2>
+    <p class="ipucu">Spotify başkasının listesinin içeriğini artık API'den vermiyor. İlk 5'i uygulamadan kopyala, buraya yapıştır.</p>
+    <label>Liste</label>
+    <select id="radarSec"></select>
+    <label>İlk 5 (satır başına "Şarkı — Sanatçı")</label>
+    <textarea id="radarMetin" placeholder="1. Şarkı — Sanatçı&#10;2. …"></textarea>
+    <button class="ana" onclick="radarKaydet()">Bu haftayı işle</button>
+    <button onclick="radarOkuAPI()">API'den denemeyi dene</button>
+    <div id="radarSonuc"></div>
+  </div>
+
+  <div class="kart">
+    <h2>Radar analizi</h2>
+    <button class="amber" onclick="radarKopyala()">Analizi kopyala</button>
+    <textarea id="radarMetinKutu" placeholder="kopyalanamazsa metin buraya düşer"></textarea>
+    <div id="radarAnaliz"></div>
+  </div>
+</section>
 </main>
 
 <nav>
@@ -308,6 +491,8 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
   <button data-s="rapor" onclick="sekme('rapor',this)"><span class="ik">📊</span>Rapor</button>
   <button data-s="aktar" onclick="sekme('aktar',this)"><span class="ik">🔁</span>Aktar</button>
   <button data-s="yedek" onclick="sekme('yedek',this)"><span class="ik">🗄️</span>Yedek</button>
+  <button data-s="saat" onclick="sekme('saat',this)"><span class="ik">⏰</span>Saat</button>
+  <button data-s="vitrin" onclick="sekme('vitrin',this)"><span class="ik">🪧</span>Vitrin</button>
   <button data-s="ayar" onclick="sekme('ayar',this)"><span class="ik">⚙️</span>Ayar</button>
 </nav>
 <div id="kapi">
@@ -325,7 +510,9 @@ select{width:100%;background:#0F0B18;color:var(--murekkep);border:1px solid var(
       <li>Yazmadan önce <b>yedek alınır</b> — Yedek sekmesinden geri dönersin.</li>
       <li id="kapiAtla"></li>
     </ul>
-    <button class="tehlike" id="kapiEvet" onclick="kapiYaz()">Evet, üzerine yaz</button>
+    <div id="kapiFark"></div>
+    <button class="ana" id="kapiFarkBtn" onclick="farkUygula()">Farkı uygula (önerilen)</button>
+    <button class="tehlike" id="kapiEvet" onclick="kapiYaz()">Üzerine yaz (klasik)</button>
     <button id="kapiHayir" onclick="kapiKapat()">Vazgeç</button>
     <p class="ipucu" id="kapiDurum" style="text-align:center"></p>
   </div>
@@ -522,9 +709,10 @@ async function api(yol,secenek){
   const kalan=kilitKalan();
   if(kalan>0)throw new Error("KISIT: Spotify kısıtlaması sürüyor — kalan "+sureYazi(kalan)+". Bitmeden istek atılmıyor.");
   if(!await hazir())throw new Error("Bağlı değilsin — Ayar sekmesinden bağlan.");
-  const r=await fetch(yol.startsWith("http")?yol:"https://api.spotify.com/v1"+yol,
-    Object.assign({headers:{Authorization:"Bearer "+token,
-      "Content-Type":"application/json"}},secenek||{}));
+  const secim=Object.assign({},secenek||{});
+  secim.headers=Object.assign({Authorization:"Bearer "+token,
+    "Content-Type":"application/json"},(secenek&&secenek.headers)||{});
+  const r=await fetch(yol.startsWith("http")?yol:"https://api.spotify.com/v1"+yol,secim);
   if(r.status===429){
     const bekle=parseInt(r.headers.get("Retry-After")||"60",10);
     kilitKoy(bekle);
@@ -534,7 +722,7 @@ async function api(yol,secenek){
   if(r.status===204)return {};
   const j=await r.json().catch(()=>({}));
   if(!r.ok){const yk=(yol.startsWith("http")?yol.replace("https://api.spotify.com/v1",""):yol).split("?")[0];
-    throw new Error(((j.error&&j.error.message)||("HTTP "+r.status))+" ["+yk+"]");}
+    throw new Error(((j.error&&j.error.message)||"Spotify hatası")+" [HTTP "+r.status+" · "+yk+"]");}
   return j;
 }
 async function listeMeta(id){
@@ -878,7 +1066,9 @@ async function ayarDisaAktar(){
   catch(e){ $("ayarIceri").value=metin; toast("Kopyalanamadı — aşağıdaki kutudan elle kopyala."); }
 }
 async function paketKur(kasaDahil){
-  return {surum:"3.4", tarih:bugun()+" "+saat(), kasaDahil:!!kasaDahil,
+  return {surum:"3.6", tarih:bugun()+" "+saat(), kasaDahil:!!kasaDahil,
+    katalog:await depoAl("katalog",{sarkilar:[]}),
+    vitrin:await depoAl("vitrin",[]), radar:await depoAl("radar",{listeler:[]}),
     ayar:await depoAl("ayar",{}), defter:await depoAl("defter",[]),
     kpiCok:await depoAl("kpiCok",{}), kpi:await depoAl("kpi",[]),
     watch:await depoAl("watch",[]), auth:await depoAl("auth",null),
@@ -913,6 +1103,9 @@ async function ayarIceAktar(){
     if(p.kpiCok)await depoYaz("kpiCok",p.kpiCok);
     if(p.kpi)await depoYaz("kpi",p.kpi);
     if(p.watch)await depoYaz("watch",p.watch);
+    if(p.katalog)await depoYaz("katalog",p.katalog);
+    if(p.vitrin)await depoYaz("vitrin",p.vitrin);
+    if(p.radar)await depoYaz("radar",p.radar);
     if(p.auth&&p.auth.rt)await depoYaz("auth",p.auth);   // Spotify oturumu da taşınsın
     if(p.yedekler&&p.yedekler.length){
       const yazildi=await depoYaz("yedekler",p.yedekler);
@@ -1131,7 +1324,7 @@ async function metindenBul(){
     }
     $("kurSuzgec").style.display="none";
     const n=kurSonuc.length;
-    let durdu=null;
+    let durdu=null, pesPese=0;
     window.hizGoster=function(sn,kacinci){
       $("kurOnizleme").innerHTML="<p class='ipucu' style='color:var(--amber)'>Spotify hız sınırı — "+sn+
         " sn bekleniyor ("+kacinci+"/6), sonra devam edecek. Sayfayı kapatma.</p>";
@@ -1145,8 +1338,17 @@ async function metindenBul(){
         r.bulunan=g.s?(g.s.sarki+" · "+g.s.sanatci):"";
       }catch(e){
         if(/^KISIT/.test(e.message)){ durdu=e.message.replace(/^KISIT: /,""); break; }
-        r.durum="yok"; r.hata=e.message;
+        // API hatası "bulunamadı" DEĞİLDİR — satır sırada kalır, tekrar taranır
+        r.hata=e.message; pesPese++;
+        if(pesPese>=3){
+          durdu="Spotify art arda "+pesPese+" aramada hata verdi ("+e.message+
+            "). Birkaç dakika nefes ver, sonra ①'e tekrar bas — satırlar kayıpsız sırada bekliyor.";
+          break;
+        }
+        await new Promise(x=>setTimeout(x,900));
+        continue;
       }
+      pesPese=0;
       r.kullan=(r.durum!=="yok");
       $("kurOnizleme").innerHTML="<p class='ipucu'>Aranıyor: "+(i+1)+"/"+n+" — "+kacir(r.sarki.slice(0,32))+"</p>";
       await new Promise(x=>setTimeout(x,120));
@@ -1225,10 +1427,18 @@ async function kapiAc(d,uriler,toplam){
   try{
     const p=await parcalar(d.id);
     KAPI.mevcut=p; $("kapiEski").textContent=p.length;
+    KAPI.adlar={}; (kurSonuc||[]).forEach(function(r){
+      if(r&&r.uri)KAPI.adlar[r.uri]={sarki:r.sarki,sanatci:r.sanatci||""}; });
+    const taranmadi=(kurSonuc||[]).filter(function(r){return r.durum==="bekle";}).length;
+    if(taranmadi>0)$("kapiAtla").innerHTML+=" <b style='color:var(--kirmizi)'>"+taranmadi+
+      " satır API hatası yüzünden hiç taranamadı — yazmadan önce ①'e tekrar bas.</b>";
+    farkBas(farkHesapla(p,uriler),d.ad);
     $("kapiDurum").textContent=""; $("kapiEvet").disabled=false;
+    if($("kapiFarkBtn"))$("kapiFarkBtn").disabled=false;
   }catch(e){ $("kapiDurum").textContent="Mevcut liste okunamadı: "+e.message; }
 }
-function kapiKapat(){$("kapi").classList.remove("acik");KAPI=null;}
+function kapiKapat(){$("kapi").classList.remove("acik");KAPI=null;
+  if($("kapiFark"))$("kapiFark").innerHTML="";}
 async function kapiYaz(){
   if(!KAPI)return;
   const d=KAPI.d, uriler=KAPI.uriler, mevcut=KAPI.mevcut||[];
@@ -1280,6 +1490,658 @@ function adresKopyala(){
   navigator.clipboard.writeText(adres()).then(()=>toast("Adres kopyalandı."))
   .catch(()=>toast("Kopyalanamadı — elle seçip kopyala."));
 }
+/* ================= v3.6 — BOZUK SAAT KATALOĞU ================= */
+const SAAT_ADIM=[["canvas","Canvas yüklendi"],["s4a","S4A'da göründü"],
+  ["liste","Kendi listelerime eklendi"],["reels","Reels paylaşıldı (linksiz)"],
+  ["tiktok","TikTok paylaşıldı (linksiz)"],["arsiv","Kapak + söz arşivlendi"]];
+const AYTR=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+let katalog={sarkilar:[]};
+
+function yeniSarkiId(){return "s"+Date.now().toString(36)+Math.floor(Math.random()*90+10);}
+function gunFark(t){
+  if(!t)return null;
+  const a=new Date(t+"T00:00:00"), b=new Date(bugun()+"T00:00:00");
+  if(isNaN(a.getTime()))return null;
+  return Math.round((a-b)/86400000);
+}
+function tarihKaydir(t,g){
+  const d=new Date(t+"T00:00:00");
+  if(isNaN(d.getTime()))return t;
+  d.setDate(d.getDate()+g);
+  return d.toISOString().slice(0,10);
+}
+function trTarih(t){
+  if(!t)return "—";
+  const p=String(t).split("-"); if(p.length!==3)return String(t);
+  return parseInt(p[2],10)+" "+(AYTR[parseInt(p[1],10)-1]||p[1])+" "+p[0];
+}
+function sarkiBul(id){for(const s of katalog.sarkilar)if(s.id===id)return s;return null;}
+function durumRozet(d){
+  return d==="yayinda"?"<span class='rozet k'>yayında</span>"
+       : d==="planli" ?"<span class='rozet s'>planlı</span>"
+       : "<span class='rozet'>taslak</span>";
+}
+
+async function katalogYukle(){
+  const k=await depoAl("katalog",null);
+  katalog=(k&&Array.isArray(k.sarkilar)) ? k
+    : {sarkilar:[{id:"kapi",ad:"Kapı",durum:"yayinda",cikis:"2026-08-14",
+        adim:{},gunluk:[],kesif:[]}]};
+  katalog.sarkilar.forEach(function(s){
+    s.adim=s.adim||{}; s.gunluk=s.gunluk||[]; s.kesif=s.kesif||[];});
+}
+async function katalogKaydet(){                 // v3.2 kuralı: yazılmadıysa ekran yalan söylemez
+  const ok=await depoYaz("katalog",katalog);
+  if(!ok){ await katalogYukle(); katalogCiz();
+    toast("Kaydedilemedi — ekran depodaki son hâle döndü."); }
+  return ok;
+}
+function katalogCiz(){ sayacCiz(); katListeCiz(); sarkiSecCiz(); gunlukCiz(); kesifCiz(); }
+
+/* ---- sayaç + pitch penceresi ---- */
+function odakSarki(){
+  let en=null;
+  katalog.sarkilar.forEach(function(s){
+    if(s.durum!=="planli"||!s.cikis)return;
+    const k=gunFark(s.cikis); if(k===null||k<0)return;
+    if(!en||k<en.k)en={s:s,k:k,tip:"planli"};
+  });
+  if(en)return en;
+  katalog.sarkilar.forEach(function(s){
+    if(s.durum!=="yayinda"||!s.cikis)return;
+    const k=gunFark(s.cikis); if(k===null)return;
+    if(!en||k>en.k)en={s:s,k:k,tip:"yayinda"};
+  });
+  return en;
+}
+function sayacCiz(){
+  const el=$("saatSayac"), kart=$("cikisKart"); if(!el)return;
+  const o=odakSarki();
+  if(!o){
+    el.innerHTML="<div class='bosluk'>Planlı çıkış yok. Aşağıdan şarkı ekle, tarihini gir.</div>";
+    if(kart)kart.style.display="none"; return;
+  }
+  if(o.tip==="planli"){
+    const pk=o.k-7, sonGun=tarihKaydir(o.s.cikis,-7);
+    let sinif="", metin="";
+    if(pk>3)      metin="Editoryal pitch için son gün <b>"+trTarih(sonGun)+"</b> — "+pk+" gün var.";
+    else if(pk>0){sinif="yakin"; metin="Pitch penceresi kapanıyor — <b>"+pk+" gün</b> kaldı ("+trTarih(sonGun)+").";}
+    else if(pk===0){sinif="yakin"; metin="<b>Pitch için son gün bugün.</b> S4A'dan bugün gönder.";}
+    else {sinif="gecti"; metin="Pitch penceresi <b>"+(-pk)+" gün önce kapandı</b>. Editoryal şans gitti — çıkış günü paneliyle telafi et.";}
+    el.innerHTML="<div class='sayacKutu'><div class='sayacGun'>"+o.k+"</div>"+
+      "<div class='sayacAlt'>gün → <b>"+kacir(o.s.ad)+"</b> · "+trTarih(o.s.cikis)+"</div>"+
+      "<div class='serit36 "+sinif+"'>"+metin+"</div></div>";
+    if(o.k===0)cikisPanelCiz(o.s); else if(kart)kart.style.display="none";
+  }else{
+    const gecen=-o.k;
+    el.innerHTML="<div class='sayacKutu'><div class='sayacGun kucukSayac'>"+
+      (gecen===0?"BUGÜN":gecen+". gün")+"</div>"+
+      "<div class='sayacAlt'><b>"+kacir(o.s.ad)+"</b> yayında · "+trTarih(o.s.cikis)+"</div></div>";
+    cikisPanelCiz(o.s);
+  }
+}
+function cikisPanelCiz(s){
+  const kart=$("cikisKart"), gov=$("cikisAdim"), bas=$("cikisBaslik");
+  if(!kart||!gov)return;
+  kart.style.display="block";
+  let bitti=0;
+  gov.innerHTML=SAAT_ADIM.map(function(a){
+    const acik=!!(s.adim&&s.adim[a[0]]); if(acik)bitti++;
+    return "<label class='adim"+(acik?" bitti":"")+"'><input type='checkbox' "+(acik?"checked":"")+
+      " onchange=\"adimDegis('"+s.id+"','"+a[0]+"',this.checked)\"><span>"+a[1]+"</span></label>";
+  }).join("");
+  if(bas)bas.innerHTML=kacir(s.ad)+" · <b>"+bitti+"/"+SAAT_ADIM.length+"</b> adım tamam";
+}
+async function adimDegis(id,anahtar,deger){
+  const s=sarkiBul(id); if(!s)return;
+  s.adim=s.adim||{}; s.adim[anahtar]=!!deger;
+  await katalogKaydet(); katalogCiz();
+}
+
+/* ---- katalog listesi ---- */
+function katListeCiz(){
+  const el=$("katListe"); if(!el)return;
+  if(!katalog.sarkilar.length){el.innerHTML="<div class='bosluk'>Katalog boş.</div>";return;}
+  const sira=katalog.sarkilar.slice().sort(function(a,b){
+    return String(b.cikis||"").localeCompare(String(a.cikis||""));});
+  el.innerHTML=sira.map(function(s){
+    const son=s.gunluk.length?s.gunluk[s.gunluk.length-1]:null;
+    const yuzde=kesifOzet(s);
+    return "<div class='ksat'><div class='ust'><b>"+kacir(s.ad)+"</b>"+durumRozet(s.durum)+
+      "<span class='tar'>"+(s.cikis?trTarih(s.cikis):"tarih yok")+"</span></div>"+
+      "<p class='ipucu' style='margin:4px 0 0'>"+
+      (son ? trTarih(son.t)+" · "+sayi(son.d||0)+" dinlenme · "+sayi(son.k||0)+" kaydetme"
+           : "günlük yok")+
+      (yuzde===null?"":" · dış kaynak %"+yuzde)+"</p>"+
+      "<button class='kucuk' onclick=\"durumDondur('"+s.id+"')\">durum çevir</button>"+
+      "<button class='kucuk' onclick=\"sarkiSil('"+s.id+"')\">sil</button></div>";
+  }).join("");
+}
+async function sarkiEkle(){
+  const ad=($("ySarkiAd").value||"").trim();
+  if(!ad){toast("Şarkı adı boş.");return;}
+  const tarih=$("ySarkiTarih").value||"", durum=$("ySarkiDurum").value||"planli";
+  if(durum!=="taslak"&&!tarih){toast("Çıkış tarihi gir ya da durumu taslak seç.");return;}
+  katalog.sarkilar.push({id:yeniSarkiId(),ad:ad,durum:durum,cikis:tarih,
+    adim:{},gunluk:[],kesif:[]});
+  if(await katalogKaydet()){
+    $("ySarkiAd").value=""; $("ySarkiTarih").value=""; toast(ad+" eklendi.");}
+  katalogCiz();
+}
+async function sarkiSil(id){
+  const s=sarkiBul(id); if(!s)return;
+  if(!confirm(s.ad+" silinecek — günlüğü ve kaynak kayıtları da gider. Emin misin?"))return;
+  katalog.sarkilar=katalog.sarkilar.filter(function(x){return x.id!==id;});
+  await katalogKaydet(); katalogCiz();
+}
+async function durumDondur(id){
+  const s=sarkiBul(id); if(!s)return;
+  s.durum = s.durum==="taslak"?"planli" : s.durum==="planli"?"yayinda" : "taslak";
+  await katalogKaydet(); katalogCiz(); toast(s.ad+" → "+s.durum);
+}
+function sarkiSecCiz(){
+  ["gunlukSarki","kesifSarki"].forEach(function(id){
+    const el=$(id); if(!el)return;
+    const eski=el.value;
+    el.innerHTML=katalog.sarkilar.map(function(s){
+      return "<option value='"+s.id+"'>"+kacir(s.ad)+"</option>";}).join("");
+    if(eski&&sarkiBul(eski))el.value=eski;
+  });
+  const t=$("gunlukTarih"); if(t&&!t.value)t.value=bugun();
+}
+
+/* ---- şarkı günlüğü (elle S4A girişi) ---- */
+async function gunlukEkle(){
+  const s=sarkiBul($("gunlukSarki").value); if(!s){toast("Önce şarkı ekle.");return;}
+  const t=$("gunlukTarih").value||bugun();
+  const d=$("gunlukD").value, l=$("gunlukL").value, k=$("gunlukK").value;
+  if(d===""&&l===""&&k===""){toast("En az bir sayı gir.");return;}
+  const kayit={t:t,d:Number(d)||0,l:Number(l)||0,k:Number(k)||0};
+  const not=($("gunlukNot").value||"").trim(); if(not)kayit.n=not;
+  const yer=s.gunluk.findIndex(function(g){return g.t===t;});
+  if(yer>=0){ if(!confirm(trTarih(t)+" için kayıt var — üstüne yazılsın mı?"))return;
+              s.gunluk[yer]=kayit; }
+  else s.gunluk.push(kayit);
+  s.gunluk.sort(function(a,b){return a.t<b.t?-1:1;});
+  if(s.gunluk.length>400)s.gunluk=s.gunluk.slice(-400);
+  if(await katalogKaydet()){
+    $("gunlukD").value=""; $("gunlukL").value=""; $("gunlukK").value="";
+    $("gunlukNot").value=""; toast("Günlüğe yazıldı.");}
+  katalogCiz();
+}
+function gunlukCiz(){
+  const el=$("gunlukGovde"); if(!el)return;
+  const sec=$("gunlukSarki");
+  const s=sec?sarkiBul(sec.value):null;
+  if(!s||!s.gunluk.length){el.innerHTML="<div class='bosluk'>Bu şarkının günlüğü boş.</div>";return;}
+  const son=s.gunluk.slice(-12);
+  let g="<table><tr><th>gün</th><th>dinlenme</th><th>fark</th><th>kaydetme</th></tr>";
+  son.forEach(function(x,i){
+    const f = i>0 ? (x.d||0)-(son[i-1].d||0) : null;
+    g+="<tr><td>"+trTarih(x.t)+"</td><td class='mono'>"+sayi(x.d||0)+"</td><td>"+delta(f)+
+       "</td><td class='mono'>"+sayi(x.k||0)+"</td></tr>";
+  });
+  g+="</table>";
+  const notlar=son.filter(function(x){return x.n;});
+  if(notlar.length)g+="<p class='ipucu'>"+notlar.map(function(x){
+    return trTarih(x.t)+": "+kacir(x.n);}).join("<br>")+"</p>";
+  el.innerHTML=kSpark(s.gunluk.map(function(x){return {v:x.d||0};}))+g;
+}
+
+/* ---- Discovered On çapraz sinyali ---- */
+function kendiListeMi(ad){
+  const a=String(ad||"").toLocaleLowerCase("tr").trim();
+  if(!a)return false;
+  return defter.some(function(d){
+    const n=String(d.ad||"").toLocaleLowerCase("tr").trim();
+    return n.length>2 && (a.indexOf(n)>=0 || n.indexOf(a)>=0);
+  });
+}
+function kesifOzet(s){
+  if(!s.kesif||!s.kesif.length)return null;
+  let top=0, dis=0;
+  s.kesif.forEach(function(k){const v=Number(k.v)||0; top+=v; if(!k.kendi)dis+=v;});
+  return top?Math.round(dis/top*100):null;
+}
+async function kesifEkle(){
+  const s=sarkiBul($("kesifSarki").value); if(!s){toast("Önce şarkı ekle.");return;}
+  const ad=($("kesifAd").value||"").trim();
+  if(!ad){toast("Kaynak liste adı boş.");return;}
+  const kendi=kendiListeMi(ad);
+  const kayit={t:bugun(),ad:ad,v:Number($("kesifV").value)||0,kendi:kendi};
+  const yer=s.kesif.findIndex(function(x){return x.ad===ad;});
+  if(yer>=0)s.kesif[yer]=kayit; else s.kesif.push(kayit);
+  if(await katalogKaydet()){
+    $("kesifAd").value=""; $("kesifV").value="";
+    toast(kendi?"Kendi listen olarak işaretlendi.":"Dış kaynak olarak işaretlendi.");}
+  katalogCiz();
+}
+function kesifCiz(){
+  const el=$("kesifGovde"); if(!el)return;
+  const sec=$("kesifSarki");
+  const s=sec?sarkiBul(sec.value):null;
+  if(!s||!s.kesif.length){el.innerHTML="<div class='bosluk'>Kaynak kaydı yok.</div>";return;}
+  const sira=s.kesif.slice().sort(function(a,b){return (Number(b.v)||0)-(Number(a.v)||0);});
+  let g="<table><tr><th>kaynak</th><th>tip</th><th>dinlenme</th></tr>";
+  sira.forEach(function(k){
+    g+="<tr><td>"+kacir(k.ad)+"</td><td>"+
+       (k.kendi?"<span class='rozet s'>kendi</span>":"<span class='rozet k'>dış</span>")+
+       "</td><td class='mono'>"+sayi(Number(k.v)||0)+"</td></tr>";});
+  g+="</table>";
+  const yuzde=kesifOzet(s);
+  if(yuzde!==null)g+="<p class='ipucu'>Dış kaynak payı: <b style='color:"+
+    (yuzde>=40?"var(--yesil)":"var(--amber)")+"'>%"+yuzde+
+    "</b> — kendi listelerinin dışından gelen dinlenme.</p>";
+  el.innerHTML=g;
+}
+
+/* ---- düz metin özeti (sohbete yapıştırmak için) ---- */
+function katalogMetin(){
+  let g="BOZUK SAAT KATALOG — "+trTarih(bugun())+"\n";
+  katalog.sarkilar.slice().sort(function(a,b){
+    return String(b.cikis||"").localeCompare(String(a.cikis||""));
+  }).forEach(function(s){
+    const k=gunFark(s.cikis);
+    g+="\n"+s.ad+" · "+s.durum+" · "+(s.cikis?trTarih(s.cikis):"tarih yok");
+    if(s.durum==="planli"&&k!==null)g+=" (çıkışa "+k+" gün · pitch "+(k-7)+" gün)";
+    if(s.durum==="yayinda"&&k!==null)g+=" ("+(-k)+". gün)";
+    g+="\n";
+    const son=s.gunluk.slice(-7);
+    if(son.length)g+="  günlük (dinlenme/dinleyici/kaydetme): "+son.map(function(x){
+      return trTarih(x.t)+" "+(x.d||0)+"/"+(x.l||0)+"/"+(x.k||0);}).join(" · ")+"\n";
+    if(s.kesif&&s.kesif.length){
+      g+="  kaynak: "+s.kesif.map(function(x){
+        return x.ad+" ("+(x.kendi?"kendi":"dış")+" "+(Number(x.v)||0)+")";}).join(" · ")+"\n";
+      const y=kesifOzet(s); if(y!==null)g+="  dış kaynak payı: %"+y+"\n";
+    }
+    const eksik=SAAT_ADIM.filter(function(a){return !(s.adim&&s.adim[a[0]]);});
+    if(s.durum!=="taslak"&&eksik.length)
+      g+="  eksik adım: "+eksik.map(function(a){return a[1];}).join(", ")+"\n";
+  });
+  return g;
+}
+function katalogKopyala(){
+  const m=katalogMetin();
+  navigator.clipboard.writeText(m).then(function(){toast("Kopyalandı — sohbete yapıştır.");})
+  .catch(function(){ $("katalogMetinKutu").value=m; toast("Kopyalanamadı — kutudan elle kopyala."); });
+}
+
+function yokTekrar(){
+  let n=0;
+  kurSonuc.forEach(function(r){ if(r.durum==="yok"){r.durum="bekle";r.uri=null;r.hata="";n++;} });
+  if(!n){toast("Bulunamadı satırı yok.");return;}
+  toast(n+" satır sıraya alındı, taranıyor…");
+  metindenBul();
+}
+
+/* ================= v3.7 — FARK / VİTRİN / RADAR ================= */
+
+/* ---- yazma uçları (Şubat 2026: /tracks → /items) ---- */
+async function ucDene(id,son,secenek){
+  const uclar = YAZMA_UC ? [YAZMA_UC] : ["items","tracks"];
+  let sonHata=null;
+  for(const uc of uclar){
+    try{ const c=await api("/playlists/"+id+"/"+uc+son,secenek); YAZMA_UC=uc; return c; }
+    catch(e){ sonHata=e; if(e.status&&e.status!==404&&e.status!==400)throw e; }
+  }
+  throw sonHata||new Error("Yazma ucu bulunamadı.");
+}
+async function parcaSil(id,uriler){
+  const govde=uriler.map(function(u){return {uri:u};});
+  try{ return await ucDene(id,"",{method:"DELETE",body:JSON.stringify({tracks:govde})}); }
+  catch(e){ return await ucDene(id,"",{method:"DELETE",body:JSON.stringify({items:govde})}); }
+}
+async function parcaEkle(id,uriler,poz){
+  const g={uris:uriler}; if(typeof poz==="number")g.position=poz;
+  return await ucDene(id,"",{method:"POST",body:JSON.stringify(g)});
+}
+async function parcaTasi(id,nereden,nereye,snapshot){
+  const g={range_start:nereden,insert_before:nereye,range_length:1};
+  if(snapshot)g.snapshot_id=snapshot;
+  return await ucDene(id,"",{method:"PUT",body:JSON.stringify(g)});
+}
+async function snapshotAl(id){
+  try{ const j=await api("/playlists/"+id+"?fields=snapshot_id"); return j&&j.snapshot_id||null; }
+  catch(e){ return null; }
+}
+
+/* ---- FARK MODU ---- */
+function farkHesapla(mevcut,hedef){
+  const mUri=mevcut.map(function(p){return p.uri;});
+  const mSet=new Set(mUri), hSet=new Set(hedef);
+  const eklenecek=[], gorulen=new Set();
+  hedef.forEach(function(u,i){
+    if(!mSet.has(u)&&!gorulen.has(u)){eklenecek.push({uri:u,poz:i});gorulen.add(u);}});
+  const silinecek=mevcut.filter(function(p){return !hSet.has(p.uri);});
+  const kalan=mUri.filter(function(u){return hSet.has(u);});
+  // uygulama sonrası sıra tahmini
+  const tahmin=kalan.slice();
+  eklenecek.slice().sort(function(a,b){return a.poz-b.poz;}).forEach(function(x){
+    tahmin.splice(Math.min(x.poz,tahmin.length),0,x.uri);});
+  let sapma=0;
+  for(let i=0;i<Math.min(tahmin.length,hedef.length);i++)if(tahmin[i]!==hedef[i])sapma++;
+  const tekrar=hedef.length-new Set(hedef).size;
+  return {eklenecek:eklenecek,silinecek:silinecek,kalan:kalan,sapma:sapma,tekrar:tekrar};
+}
+function farkBas(f,hedefAd){
+  const el=$("kapiFark"); if(!el)return;
+  const ad=function(u){ const p=(KAPI&&KAPI.adlar)?KAPI.adlar[u]:null;
+    return p?(p.sarki+" — "+p.sanatci):u.replace("spotify:track:",""); };
+  let g="<div class='farkOzet'>"+
+    "<div class='art'><b>+"+f.eklenecek.length+"</b><small>eklenecek</small></div>"+
+    "<div class='eks'><b>−"+f.silinecek.length+"</b><small>silinecek</small></div>"+
+    "<div class='ayn'><b>"+f.kalan.length+"</b><small>dokunulmayacak</small></div></div>";
+  if(f.eklenecek.length||f.silinecek.length){
+    g+="<div class='farkDok'>"+
+      f.eklenecek.map(function(x){return "<div class='a'>"+kacir(ad(x.uri))+"</div>";}).join("")+
+      f.silinecek.map(function(p){return "<div class='s'>"+kacir(p.sarki+" — "+p.sanatci)+"</div>";}).join("")+
+      "</div>";
+  }
+  if(f.tekrar>0)g+="<p class='ipucu' style='color:var(--amber)'>Hedef listede "+f.tekrar+
+    " tekrar var — silme işlemi tekrarların hepsini birden kaldırır.</p>";
+  if(f.sapma>0)g+="<p class='ipucu'>Tahmini sıra sapması: <b>"+f.sapma+
+    "</b> şarkı hedef konumunda olmayacak. Açılış önemliyse Vitrin sekmesinden düzelt.</p>";
+  el.innerHTML=g;
+}
+async function farkUygula(){
+  if(!KAPI||!KAPI.mevcut)return;
+  const d=KAPI.d, hedef=KAPI.uriler, mevcut=KAPI.mevcut;
+  const f=farkHesapla(mevcut,hedef);
+  if(!f.eklenecek.length&&!f.silinecek.length){toast("Fark yok — liste zaten hedefle aynı.");return;}
+  $("kapiEvet").disabled=true; $("kapiFarkBtn").disabled=true; $("kapiHayir").disabled=true;
+  try{
+    let y=await depoAl("yedekler",[]);
+    y.unshift({t:bugun()+" "+saat(), ad:d.ad, id:d.id, parcalar:mevcut});
+    if(y.length>12)y=y.slice(0,12);
+    await depoYaz("yedekler",y); yedekBas(y);
+    $("kapiDurum").textContent="yedek alındı — fark uygulanıyor…";
+    for(let i=0;i<f.silinecek.length;i+=100){
+      const grup=f.silinecek.slice(i,i+100).map(function(p){return p.uri;});
+      await parcaSil(d.id,grup);
+      $("kapiDurum").textContent="silindi "+Math.min(i+100,f.silinecek.length)+"/"+f.silinecek.length;
+    }
+    const sirali=f.eklenecek.slice().sort(function(a,b){return a.poz-b.poz;});
+    for(let i=0;i<sirali.length;i++){
+      await parcaEkle(d.id,[sirali[i].uri],sirali[i].poz);
+      $("kapiDurum").textContent="eklendi "+(i+1)+"/"+sirali.length;
+    }
+    await vitrinGunlukEkle({tip:"fark",id:d.id,ad:d.ad,
+      not:"+"+f.eklenecek.length+" / −"+f.silinecek.length});
+    kapiKapat();
+    toast(d.ad+": +"+f.eklenecek.length+" −"+f.silinecek.length+" uygulandı ✓");
+  }catch(e){ $("kapiDurum").textContent="Fark durdu: "+e.message+" — yedek kasada duruyor."; }
+  $("kapiEvet").disabled=false; $("kapiFarkBtn").disabled=false; $("kapiHayir").disabled=false;
+}
+
+/* ---- VİTRİN: liste seçici ---- */
+function vitrinSecCiz(){
+  const el=$("vitrinListe"); if(!el)return;
+  const eski=el.value;
+  el.innerHTML=defter.map(function(d){
+    return "<option value='"+d.id+"'>"+kacir(d.ad)+"</option>";}).join("");
+  if(!defter.length&&ayar.ana){const i=pid(ayar.ana);
+    if(i)el.innerHTML="<option value='"+i+"'>Ana liste</option>";}
+  if(eski)el.value=eski;
+}
+function vitrinListeId(){const el=$("vitrinListe");return el&&el.value?el.value:pid(ayar.ana);}
+function vitrinListeAd(){const el=$("vitrinListe");
+  return (el&&el.selectedIndex>=0&&el.options[el.selectedIndex])?el.options[el.selectedIndex].text:"liste";}
+
+/* ---- İLK 5 ROTASYONU ---- */
+let ACILIS=null;
+async function acilisOku(){
+  const id=vitrinListeId(); if(!id){toast("Liste seç.");return;}
+  const el=$("acilisGovde"); el.innerHTML="<p class='ipucu'>okunuyor…</p>";
+  try{
+    const p=await parcalar(id);
+    ACILIS={id:id,parcalar:p};
+    el.innerHTML=p.slice(0,10).map(function(x,i){
+      return "<div class='vsat'><span class='no'>"+(i+1)+"</span>"+
+        "<span class='bil'>"+kacir(x.sarki+" — "+x.sanatci)+"</span>"+
+        (i===0?"<span class='rozet k'>açılış</span>":
+          "<button class='kucuk' onclick=\"basaAl("+i+")\">başa al</button>")+"</div>";
+    }).join("")+"<p class='ipucu'>Toplam "+p.length+" şarkı. Taşıma tek istek, silme yok.</p>";
+  }catch(e){ el.innerHTML="<p class='ipucu' style='color:var(--kirmizi)'>"+kacir(e.message)+"</p>"; }
+}
+async function basaAl(i){
+  if(!ACILIS)return;
+  const p=ACILIS.parcalar[i]; if(!p)return;
+  if(!confirm("\""+p.sarki+"\" açılışa taşınsın mı? (silme yok, sadece sıra)"))return;
+  try{
+    const snap=await snapshotAl(ACILIS.id);
+    await parcaTasi(ACILIS.id,i,0,snap);
+    await vitrinGunlukEkle({tip:"acilis",id:ACILIS.id,ad:vitrinListeAd(),
+      not:p.sarki+" — "+p.sanatci});
+    toast("Açılış değişti ✓");
+    await acilisOku();
+  }catch(e){toast("Taşınamadı: "+e.message);}
+}
+
+/* ---- İSİM + AÇIKLAMA ---- */
+async function vitrinOku(){
+  const id=vitrinListeId(); if(!id){toast("Liste seç.");return;}
+  try{
+    const j=await api("/playlists/"+id+"?fields=name,description");
+    $("vitrinAd").value=j.name||"";
+    $("vitrinAciklama").value=(j.description||"").replace(/<[^>]*>/g,"");
+    vitrinSayacBas(); toast("Getirildi.");
+  }catch(e){toast("Okunamadı: "+e.message);}
+}
+function vitrinSayacBas(){
+  const a=($("vitrinAciklama").value||"").length;
+  const el=$("vitrinSayac"); if(!el)return;
+  el.innerHTML="Açıklama "+a+" karakter"+(a>300?" — <b style='color:var(--kirmizi)'>300 sınırını aştın</b>":"");
+}
+async function vitrinYaz(){
+  const id=vitrinListeId(); if(!id){toast("Liste seç.");return;}
+  const ad=($("vitrinAd").value||"").trim(), ac=($("vitrinAciklama").value||"").trim();
+  if(!ad){toast("İsim boş olamaz.");return;}
+  if(ac.length>300){toast("Açıklama 300 karakteri geçemez.");return;}
+  if(!confirm("Listenin ismi ve açıklaması Spotify'da değişecek. Onaylıyor musun?"))return;
+  try{
+    await api("/playlists/"+id,{method:"PUT",body:JSON.stringify({name:ad,description:ac})});
+    await vitrinGunlukEkle({tip:"vitrin",id:id,ad:vitrinListeAd(),not:ad});
+    toast("Vitrin güncellendi ✓");
+  }catch(e){toast("Yazılamadı: "+e.message);}
+}
+
+/* ---- KAPAK ---- */
+let KAPAK=null;
+function kapakSec(el){
+  const f=el.files&&el.files[0]; if(!f)return;
+  const oku=new FileReader();
+  oku.onload=function(){
+    const im=new Image();
+    im.onload=function(){
+      const c=document.createElement("canvas"); c.width=640; c.height=640;
+      const x=c.getContext("2d");
+      const kn=Math.min(im.width,im.height);
+      x.drawImage(im,(im.width-kn)/2,(im.height-kn)/2,kn,kn,0,0,640,640);
+      let kal=0.82, veri=c.toDataURL("image/jpeg",kal);
+      while(veri.length>256000&&kal>0.4){kal-=0.1;veri=c.toDataURL("image/jpeg",kal);}
+      KAPAK=veri.split(",")[1];
+      const on=$("kapakOnIzle"); on.src=veri; on.style.display="block";
+      $("kapakBilgi").innerHTML="Hazır: 640×640 JPEG · "+(KAPAK.length/1024).toFixed(0)+" KB"+
+        (KAPAK.length>256000?" — <b style='color:var(--kirmizi)'>hâlâ büyük</b>":"");
+      $("kapakBas").disabled=KAPAK.length>256000;
+    };
+    im.onerror=function(){toast("Görsel açılamadı.");};
+    im.src=oku.result;
+  };
+  oku.onerror=function(){toast("Dosya okunamadı.");};
+  oku.readAsDataURL(f);
+}
+async function kapakYukle(){
+  const id=vitrinListeId(); if(!id||!KAPAK){toast("Önce liste ve görsel seç.");return;}
+  if(!confirm("Listenin kapağı değişecek. Eski kapak geri gelmez — onaylıyor musun?"))return;
+  try{
+    await api("/playlists/"+id+"/images",
+      {method:"PUT",headers:{"Content-Type":"image/jpeg"},body:KAPAK});
+    await vitrinGunlukEkle({tip:"kapak",id:id,ad:vitrinListeAd(),not:"yeni kapak"});
+    toast("Kapak yüklendi ✓ (Spotify'da birkaç dakikada görünür)");
+  }catch(e){toast("Yüklenemedi: "+e.message);}
+}
+
+/* ---- VİTRİN GÜNLÜĞÜ (KPI ile eşleşir) ---- */
+async function vitrinGunlukEkle(kayit){
+  let g=await depoAl("vitrin",[]);
+  g.unshift(Object.assign({t:bugun()+" "+saat()},kayit));
+  if(g.length>120)g=g.slice(0,120);
+  await depoYaz("vitrin",g);
+  vitrinGunlukBas();
+}
+async function vitrinGunlukBas(){
+  const el=$("vitrinGunluk"); if(!el)return;
+  const g=await depoAl("vitrin",[]);
+  if(!g.length){el.innerHTML="<div class='bosluk'>Henüz değişiklik yok.</div>";return;}
+  const kutu=await depoAl("kpiCok",{});
+  const etiket={fark:"fark uygulandı",acilis:"açılış değişti",vitrin:"isim/açıklama",kapak:"kapak"};
+  el.innerHTML=g.slice(0,20).map(function(k){
+    let sonra="";
+    const log=kutu[k.id]||[];
+    const gun=String(k.t).slice(0,10);
+    const once=log.filter(function(x){return x.t<=gun;}).pop();
+    const son=log.length?log[log.length-1]:null;
+    if(once&&son&&son.t>gun)sonra=" · o günden beri "+delta(son.v-once.v);
+    return "<div class='gunlukSat'><b>"+(etiket[k.tip]||k.tip)+"</b> — "+kacir(k.ad)+
+      "<div class='et'>"+kacir(k.t)+" · "+kacir(k.not||"")+sonra+"</div></div>";
+  }).join("");
+}
+
+/* ---- RADAR (sadece okuma/analiz) ---- */
+let radar={listeler:[]};
+async function radarYukle(){
+  const r=await depoAl("radar",null);
+  radar=(r&&Array.isArray(r.listeler))?r:{listeler:[]};
+  radar.listeler.forEach(function(l){l.kayitlar=l.kayitlar||[];});
+}
+async function radarKaydetDepo(){
+  const ok=await depoYaz("radar",radar);
+  if(!ok){await radarYukle();radarCiz();toast("Kaydedilemedi — ekran depodaki hâle döndü.");}
+  return ok;
+}
+function radarCiz(){radarListeCiz();radarSecCiz();radarAnalizCiz();}
+async function radarEkle(){
+  const ad=($("radarAd").value||"").trim(); if(!ad){toast("Liste adı boş.");return;}
+  const link=($("radarLink").value||"").trim();
+  radar.listeler.push({rid:"r"+Date.now().toString(36),ad:ad,link:link,
+    sid:link?pid(link):null,kayitlar:[]});
+  if(await radarKaydetDepo()){$("radarAd").value="";$("radarLink").value="";toast(ad+" radara eklendi.");}
+  radarCiz();
+}
+async function radarSil(rid){
+  const l=radar.listeler.find(function(x){return x.rid===rid;}); if(!l)return;
+  if(!confirm(l.ad+" radardan silinsin mi?"))return;
+  radar.listeler=radar.listeler.filter(function(x){return x.rid!==rid;});
+  await radarKaydetDepo(); radarCiz();
+}
+function radarListeCiz(){
+  const el=$("radarListe"); if(!el)return;
+  if(!radar.listeler.length){el.innerHTML="<div class='bosluk'>Radar boş.</div>";return;}
+  el.innerHTML=radar.listeler.map(function(l){
+    const son=l.kayitlar.length?l.kayitlar[l.kayitlar.length-1]:null;
+    return "<div class='ksat'><div class='ust'><b>"+kacir(l.ad)+"</b>"+
+      "<span class='tar'>"+(son?son.t:"kayıt yok")+"</span></div>"+
+      "<p class='ipucu' style='margin:4px 0 0'>"+
+      (son?son.ilk5.map(function(x){return kacir(x.sarki);}).join(" · "):"ilk 5 girilmedi")+"</p>"+
+      "<button class='kucuk' onclick=\"radarSil('"+l.rid+"')\">sil</button></div>";
+  }).join("");
+}
+function radarSecCiz(){
+  const el=$("radarSec"); if(!el)return;
+  const eski=el.value;
+  el.innerHTML=radar.listeler.map(function(l){
+    return "<option value='"+l.rid+"'>"+kacir(l.ad)+"</option>";}).join("");
+  if(eski)el.value=eski;
+}
+function ilk5Ayikla(metin){
+  return String(metin||"").split("\n").map(function(s){return s.trim();})
+    .filter(function(s){return s.length>1;})
+    .map(function(s){
+      s=s.replace(/^\s*\d+[\.\)]\s*/,"");
+      const p=s.split(/\s+[—–-]\s+/);
+      return {sarki:(p[0]||s).trim(),sanatci:(p[1]||"").trim()};
+    }).slice(0,5);
+}
+async function radarKaydet(){
+  const l=radar.listeler.find(function(x){return x.rid===$("radarSec").value;});
+  if(!l){toast("Önce radara liste ekle.");return;}
+  const ilk5=ilk5Ayikla($("radarMetin").value);
+  if(!ilk5.length){toast("İlk 5 boş.");return;}
+  const gun=bugun();
+  const yer=l.kayitlar.findIndex(function(k){return k.t===gun;});
+  const kayit={t:gun,ilk5:ilk5};
+  if(yer>=0)l.kayitlar[yer]=kayit; else l.kayitlar.push(kayit);
+  if(l.kayitlar.length>30)l.kayitlar=l.kayitlar.slice(-30);
+  if(await radarKaydetDepo()){$("radarMetin").value="";toast(l.ad+" için "+ilk5.length+" satır işlendi.");}
+  radarCiz();
+}
+async function radarOkuAPI(){
+  const l=radar.listeler.find(function(x){return x.rid===$("radarSec").value;});
+  if(!l){toast("Önce radara liste ekle.");return;}
+  if(!l.sid){toast("Bu listenin linki yok.");return;}
+  const el=$("radarSonuc"); el.innerHTML="<p class='ipucu'>deneniyor…</p>";
+  try{
+    const p=await parcalar(l.sid);
+    if(!p.length)throw new Error("içerik boş döndü");
+    $("radarMetin").value=p.slice(0,5).map(function(x,i){
+      return (i+1)+". "+x.sarki+" — "+x.sanatci;}).join("\n");
+    el.innerHTML="<p class='ipucu' style='color:var(--yesil)'>API açık — ilk 5 kutuya dolduruldu, 'Bu haftayı işle'ye bas.</p>";
+  }catch(e){
+    el.innerHTML="<p class='ipucu'>API kapalı (Şubat 2026: başkasının listesinin içeriği verilmiyor). "+
+      "Spotify uygulamasında listeyi aç → ilk 5'i elle yaz. Hata: "+kacir(e.message)+"</p>";
+  }
+}
+function radarAnalizCiz(){
+  const el=$("radarAnaliz"); if(!el)return;
+  const kayitli=radar.listeler.filter(function(l){return l.kayitlar.length;});
+  if(!kayitli.length){el.innerHTML="<div class='bosluk'>Analiz için en az bir hafta işle.</div>";return;}
+  const anahtar=function(x){return (x.sarki+"|"+x.sanatci).toLocaleLowerCase("tr");};
+  const sayac={}, isim={};
+  kayitli.forEach(function(l){
+    const son=l.kayitlar[l.kayitlar.length-1];
+    son.ilk5.forEach(function(x){
+      const a=anahtar(x); sayac[a]=(sayac[a]||0)+1; isim[a]=x;});
+  });
+  const ortak=Object.keys(sayac).filter(function(a){return sayac[a]>1;})
+    .sort(function(a,b){return sayac[b]-sayac[a];});
+  let g="";
+  if(ortak.length){
+    g+="<p class='ipucu'><b>Birden fazla listenin açılışında:</b></p><table>";
+    ortak.forEach(function(a){
+      g+="<tr><td>"+kacir(isim[a].sarki+" — "+isim[a].sanatci)+"</td><td class='mono'>"+
+         sayac[a]+" liste</td></tr>";});
+    g+="</table>";
+  }
+  let yeniG="";
+  kayitli.forEach(function(l){
+    if(l.kayitlar.length<2)return;
+    const son=l.kayitlar[l.kayitlar.length-1], onceki=l.kayitlar[l.kayitlar.length-2];
+    const eski=new Set(onceki.ilk5.map(anahtar));
+    const yeni=son.ilk5.filter(function(x){return !eski.has(anahtar(x));});
+    if(yeni.length)yeniG+="<div class='gunlukSat'><b>"+kacir(l.ad)+"</b><div class='et'>"+
+      yeni.map(function(x){return kacir(x.sarki+" — "+x.sanatci);}).join("<br>")+"</div></div>";
+  });
+  if(yeniG)g+="<p class='ipucu'><b>Geçen ölçüme göre açılışa yeni girenler:</b></p>"+yeniG;
+  el.innerHTML=g||"<div class='bosluk'>Karşılaştırma için ikinci ölçüm gerekiyor.</div>";
+}
+function radarMetin(){
+  let g="RADAR — RAKİP AÇILIŞLARI · "+bugun()+"\n";
+  radar.listeler.forEach(function(l){
+    g+="\n"+l.ad+"\n";
+    l.kayitlar.slice(-3).forEach(function(k){
+      g+="  "+k.t+": "+k.ilk5.map(function(x){
+        return x.sarki+(x.sanatci?" — "+x.sanatci:"");}).join(" | ")+"\n";});
+    if(!l.kayitlar.length)g+="  (kayıt yok)\n";
+  });
+  return g;
+}
+function radarKopyala(){
+  const m=radarMetin();
+  navigator.clipboard.writeText(m).then(function(){toast("Kopyalandı — sohbete yapıştır.");})
+  .catch(function(){$("radarMetinKutu").value=m;toast("Kopyalanamadı — kutudan elle kopyala.");});
+}
+
 (async function(){
   ayar=Object.assign(ayar,await depoAl("ayar",{}));
   $("aClient").value=ayar.client_id||"";
@@ -1290,6 +2152,9 @@ function adresKopyala(){
   if(!defter.length&&ayar.ana){const id=pid(ayar.ana);
     if(id)defter=[{id:id,ad:"Ana liste (ayardan)",rol:"AKIŞ",ritim:"haftalık",yazma:false}];}
   defterCiz(); hedefBas(); depoBilgiBas(); cihazBilgiBas(); tamBilgiBas();
+  await katalogYukle(); katalogCiz();
+  await radarYukle(); vitrinSecCiz(); radarCiz(); vitrinGunlukBas();
+  $("vitrinAciklama").addEventListener("input",vitrinSayacBas);
   $("kurHedef").addEventListener("change",hedefBilgi);
   $("defterSec").addEventListener("change",function(e){ defterDokun(e.target); });
   kpiTabloBas(await depoAl("kpi",[]));
