@@ -206,7 +206,7 @@ nav button{font-size:11px}
 </head>
 <body>
 <header>
-  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.7</em></div>
+  <div class="logo">KANKA <span>CEP</span> <em style="font-size:11px;color:#9C92AE;font-style:normal;letter-spacing:0">v3.8</em></div>
   <div id="durum"><span id="nokta"></span><span id="durumYazi">bağlı değil</span></div>
 </header>
 
@@ -1800,12 +1800,38 @@ async function parcaTasi(id,nereden,nereye,snapshot){
   if(snapshot)g.snapshot_id=snapshot;
   return await ucDene(id,"",{method:"PUT",body:JSON.stringify(g)});
 }
+async function parcaTasi2(id,a,snapshot){
+  const g={range_start:a.range_start,insert_before:a.insert_before,range_length:a.range_length};
+  if(snapshot)g.snapshot_id=snapshot;
+  return await ucDene(id,"",{method:"PUT",body:JSON.stringify(g)});
+}
 async function snapshotAl(id){
   try{ const j=await api("/playlists/"+id+"?fields=snapshot_id"); return j&&j.snapshot_id||null; }
   catch(e){ return null; }
 }
 
 /* ---- FARK MODU ---- */
+let FARK_TEMPO=400;                                  // taşıma istekleri arası nefes (ms)
+function siraPlani(canli,hedef){
+  // hedefi canlıda GERÇEKTEN olanlara indir (çok küme) — hiza asla bozulmaz
+  const havuz={};
+  canli.forEach(function(x){havuz[x]=(havuz[x]||0)+1;});
+  const h=[]; let uyusmayan=0;
+  hedef.forEach(function(x){ if(havuz[x]>0){havuz[x]--;h.push(x);} else uyusmayan++; });
+  const sim=canli.slice(), plan=[]; let i=0;
+  while(i<h.length&&plan.length<200){
+    if(sim[i]===h[i]){i++;continue;}
+    const j=sim.indexOf(h[i],i);
+    if(j<0){i++;continue;}                           // teorik olarak imkânsız, sigorta
+    let k=1;
+    while(j+k<sim.length&&i+k<h.length&&sim[j+k]===h[i+k])k++;
+    plan.push({range_start:j,insert_before:i,range_length:k});
+    const blok=sim.splice(j,k);
+    for(let t=blok.length-1;t>=0;t--)sim.splice(i,0,blok[t]);
+    i+=k;
+  }
+  return {plan:plan,uyusmayan:uyusmayan,son:sim};
+}
 function farkHesapla(mevcut,hedef){
   const mUri=mevcut.map(function(p){return p.uri;});
   const mSet=new Set(mUri), hSet=new Set(hedef);
@@ -1814,14 +1840,14 @@ function farkHesapla(mevcut,hedef){
     if(!mSet.has(u)&&!gorulen.has(u)){eklenecek.push({uri:u,poz:i});gorulen.add(u);}});
   const silinecek=mevcut.filter(function(p){return !hSet.has(p.uri);});
   const kalan=mUri.filter(function(u){return hSet.has(u);});
-  // uygulama sonrası sıra tahmini
+  // ekleme/silme sonrası sıra tahmini + gerçek taşıma planı
   const tahmin=kalan.slice();
   eklenecek.slice().sort(function(a,b){return a.poz-b.poz;}).forEach(function(x){
     tahmin.splice(Math.min(x.poz,tahmin.length),0,x.uri);});
-  let sapma=0;
-  for(let i=0;i<Math.min(tahmin.length,hedef.length);i++)if(tahmin[i]!==hedef[i])sapma++;
+  const plan=siraPlani(tahmin,hedef);
   const tekrar=hedef.length-new Set(hedef).size;
-  return {eklenecek:eklenecek,silinecek:silinecek,kalan:kalan,sapma:sapma,tekrar:tekrar};
+  return {eklenecek:eklenecek,silinecek:silinecek,kalan:kalan,
+    plan:plan.plan,uyusmayan:plan.uyusmayan,tekrar:tekrar};
 }
 function farkBas(f,hedefAd){
   const el=$("kapiFark"); if(!el)return;
@@ -1839,8 +1865,13 @@ function farkBas(f,hedefAd){
   }
   if(f.tekrar>0)g+="<p class='ipucu' style='color:var(--amber)'>Hedef listede "+f.tekrar+
     " tekrar var — silme işlemi tekrarların hepsini birden kaldırır.</p>";
-  if(f.sapma>0)g+="<p class='ipucu'>Tahmini sıra sapması: <b>"+f.sapma+
-    "</b> şarkı hedef konumunda olmayacak. Açılış önemliyse Vitrin sekmesinden düzelt.</p>";
+  const istek=f.silinecek.length?Math.ceil(f.silinecek.length/100):0;
+  const toplamIstek=istek+f.eklenecek.length+f.plan.length+2;
+  if(f.plan.length>0)g+="<p class='ipucu'>Sıra düzeltme: <b>"+f.plan.length+
+    " taşıma</b> — içerikten sonra sıra da hedefle birebir yapılacak (toplam ~"+toplamIstek+" istek).</p>";
+  if(f.plan.length>35)g+="<p class='ipucu' style='color:var(--amber)'>Bu hafta karışım derin — "+
+    "fark yolu ~"+toplamIstek+" istek eder. Acelen varsa bu seferlik klasik üzerine yazma (2 istek) "+
+    "daha ucuz; ama added_at damgalarını sıfırlar.</p>";
   el.innerHTML=g;
 }
 async function farkUygula(){
@@ -1865,11 +1896,29 @@ async function farkUygula(){
       await parcaEkle(d.id,[sirali[i].uri],sirali[i].poz);
       $("kapiDurum").textContent="eklendi "+(i+1)+"/"+sirali.length;
     }
+    // 3. faz: sıra düzeltme — canlıyı yeniden oku, plana göre blok taşı
+    let tasima=0;
+    $("kapiDurum").textContent="sıra denetleniyor — liste yeniden okunuyor…";
+    const canliP=await parcalar(d.id);
+    const sp=siraPlani(canliP.map(function(p){return p.uri;}),hedef);
+    if(sp.plan.length){
+      let snap=await snapshotAl(d.id);
+      for(let i=0;i<sp.plan.length;i++){
+        const a=sp.plan[i];
+        const c=await parcaTasi2(d.id,a,snap);
+        if(c&&c.snapshot_id)snap=c.snapshot_id;
+        tasima++;
+        $("kapiDurum").textContent="sıra düzeltiliyor "+tasima+"/"+sp.plan.length;
+        await new Promise(function(x){setTimeout(x,FARK_TEMPO);});
+      }
+    }
     await vitrinGunlukEkle({tip:"fark",id:d.id,ad:d.ad,
-      not:"+"+f.eklenecek.length+" / −"+f.silinecek.length});
+      not:"+"+f.eklenecek.length+" / −"+f.silinecek.length+" / ↕"+tasima});
     kapiKapat();
     toast(d.ad+": +"+f.eklenecek.length+" −"+f.silinecek.length+" uygulandı ✓");
-  }catch(e){ $("kapiDurum").textContent="Fark durdu: "+e.message+" — yedek kasada duruyor."; }
+  }catch(e){ $("kapiDurum").textContent="Fark durdu: "+e.message+
+    " — yedek kasada. İçerik yazıldıysa sıra yarım kalmış olabilir: kısıt bitince aynı metinle "+
+    "'Farkı uygula'ya tekrar bas, +0/−0 çıkar ve sadece kalan taşımaları yapar."; }
   $("kapiEvet").disabled=false; $("kapiFarkBtn").disabled=false; $("kapiHayir").disabled=false;
 }
 
